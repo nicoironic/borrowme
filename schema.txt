@@ -1,0 +1,64 @@
+teachers
+	user_id
+	teacher_id
+	firstname
+	lastname
+	address
+	contact_details
+
+
+students
+	user_id
+	student_id
+	firstname
+	lastname
+	address
+	contact_details	
+
+
+lab incharge
+	user_id
+	worker_id
+	firstname
+	lastname
+	address
+	contact_details
+
+
+	returned_items_history
+		id
+		worker_id
+		student_id
+		item_id
+		quantity
+			
+
+
+laboratories
+	id
+	name
+	teacher_id
+	worker_id
+	subject_id
+	status
+
+
+subjects
+	id
+	name
+	description
+	schedule_start_date
+	schedule_end_date
+	status
+
+
+items
+	id
+	name
+	description
+	specifications
+	quantity
+	status
+
+
+		

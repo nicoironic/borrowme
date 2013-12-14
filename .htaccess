@@ -1,0 +1,29 @@
+# Apache for "Don't look at me."
+Options -Indexes
+
+# ----------------------------------------------------------------------
+# Start rewrite engine
+# ----------------------------------------------------------------------
+
+# Turning on the rewrite engine is necessary for the following rules and features.
+# FollowSymLinks must be enabled for this to work.
+
+<IfModule mod_rewrite.c>
+  Options +FollowSymlinks -Indexes
+  RewriteEngine On
+  
+  # If you installed Bonfire in a subfolder, you will need to 
+  # change the following line to match the subfolder you need. 
+  # http://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewritebase
+  RewriteBase /public
+</IfModule>
+
+<IfModule mod_rewrite.c>
+        RewriteEngine On
+
+        # Removes index.php from ExpressionEngine URLs
+        RewriteCond $1 !\.(gif|jpe?g|png)$ [NC]
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule ^(.*)$ /index.php/$1 [L]
+</IfModule>
