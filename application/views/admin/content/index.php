@@ -1,7 +1,7 @@
-<h1>This Page Intentionally Left Blank</h1>
+<h1>Inventory and Reservation System</h1>
 
-<p>As of Bonfire <?php echo BONFIRE_VERSION ?>, this page has no default content.</p>
-
-<p>This is your playground.</p>
-
-<p>Make it home.</p>
+<h3>The Team</h3>
+<ul>
+    <li>Tzerine Bazar Montecalvo</li>
+    <li>Marie Sharmaine L. Nadela</li>
+</ul>

@@ -1,15 +1,38 @@
+<ul class="pagination">
+    <li><a href="#">&laquo;</a></li>
+    <li><a href="#">1</a></li>
+    <li><a href="#">2</a></li>
+    <li><a href="#">3</a></li>
+    <li><a href="#">4</a></li>
+    <li><a href="#">5</a></li>
+    <li><a href="#">&raquo;</a></li>
+</ul>
+
 <div class="jumbotron" text-align="center">
-	<h1>Welcome to Bonfire</h1>
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span8">
+                <div class="items-container">
+                    &nbsp;
+                </div>
 
-	<p class="lead">Kickstart your CodeIgniter applications and save yourself 100s of hours of development time.<br/>That means you make more money.</p>
-
-	<?php if (isset($current_user->email)) : ?>
-		<a href="<?php echo site_url(SITE_AREA) ?>" class="btn btn-large btn-success">Go to the Admin area</a>
-	<?php else :?>
-		<a href="<?php echo site_url(LOGIN_URL); ?>" class="btn btn-large btn-primary"><?php echo lang('bf_action_login'); ?></a>
-	<?php endif;?>
-
-	<br/><br/><a href="<?php echo site_url('/docs') ?>" class="btn btn-large btn-info">Browse the Docs</a>
+                <div class="paginator">
+                    <ul class="pagination">
+                        <li><a href="#">&laquo;</a></li>
+                        <li><a href="#">1</a></li>
+                        <li><a href="#">2</a></li>
+                        <li><a href="#">3</a></li>
+                        <li><a href="#">4</a></li>
+                        <li><a href="#">5</a></li>
+                        <li><a href="#">&raquo;</a></li>
+                    </ul>
+                <div>
+            </div>
+            <div class="span4">
+                Ironic
+            </div>
+        </div>
+    </div>
 </div>
 
 <hr />
