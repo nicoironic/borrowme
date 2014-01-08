@@ -18,7 +18,7 @@ $has_records	= isset($records) && is_array($records) && count($records);
 					
 					<th>First Name</th>
 					<th>Last Name</th>
-					<th>Address</th>
+					<th>Email</th>
 					<th>Contact Details</th>
 				</tr>
 			</thead>
@@ -50,7 +50,7 @@ $has_records	= isset($records) && is_array($records) && count($records);
 					<td><?php e($record->firstname); ?></td>
 				<?php endif; ?>
 					<td><?php e($record->lastname) ?></td>
-					<td><?php e($record->address) ?></td>
+					<td><?php e($record->email) ?></td>
 					<td><?php e($record->contact_details) ?></td>
 				</tr>
 				<?php

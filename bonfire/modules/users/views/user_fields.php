@@ -59,7 +59,7 @@ $defaultTimezone = isset($current_user) ? $current_user->timezone : strtoupper(s
     </div>
 </div>
 <?php endif;
-
+/*
 if (isset($languages) && is_array($languages) && count($languages)) :
     if(count($languages) == 1):
 ?>
@@ -83,6 +83,7 @@ if (isset($languages) && is_array($languages) && count($languages)) :
 <?php
     endif;
 endif;
+
 ?>
 <div class="control-group<?php echo iif(form_error('timezone'), $errorClass); ?>">
     <label class="control-label required" for="timezones"><?php echo lang('bf_timezone'); ?></label>
@@ -91,3 +92,4 @@ endif;
         <span class="help-inline"><?php echo form_error('timezones'); ?></span>
     </div>
 </div>
+*/ ?>

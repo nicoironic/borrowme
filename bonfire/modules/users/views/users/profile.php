@@ -34,7 +34,7 @@ $fieldData = array(
                 Events::trigger('render_user_form', $user );
                 ?>
                 <!-- Start User Meta -->
-                <?php $this->load->view('users/user_meta', array('frontend_only' => true));?>
+                <?php $this->load->view('users/user_others', array('frontend_only' => true));?>
                 <!-- End of User Meta -->
                 <div class="form-actions">
                     <input type="submit" name="save" class="btn btn-primary" value="<?php echo lang('bf_action_save') . ' ' . lang('bf_user'); ?>" />

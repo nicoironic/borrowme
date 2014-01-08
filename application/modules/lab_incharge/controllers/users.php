@@ -64,6 +64,11 @@ class users extends Admin_Controller
 
 		$records = $this->lab_incharge_model->find_all();
 
+        foreach($records as $row) {
+            $user = $this->user_model->find($row->user_id);
+            $row->email = $user->email;
+        }
+
 		Template::set('records', $records);
 		Template::set('toolbar_title', 'Manage Lab Incharge');
 		Template::render();
@@ -229,6 +234,7 @@ class users extends Admin_Controller
                 $data['password']               = $this->input->post('lab_incharge_password');
                 $data['display_name']           = $this->input->post('lab_incharge_username');
                 $data['active']                 = 1;
+                $data['role_desc']              = 'lab_incharge';
 
                 if ($user_id = $this->user_model->insert($data)) {
                     $data               = array();

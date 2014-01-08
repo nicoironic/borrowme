@@ -1,9 +1,12 @@
 <div class="masthead">
     <ul class="nav nav-pills pull-right">
         <li <?php echo check_class('home'); ?>><a href="<?php echo site_url(); ?>"><?php e( lang('bf_home') ); ?></a></li>
-        <?php if (empty($current_user)) :?>
+        <?php if (empty($current_user)) : ?>
             <li><a href="<?php echo site_url(LOGIN_URL); ?>">Sign In</a></li>
         <?php else: ?>
+            <?php if($current_user->role_id == 1): ?>
+                <li><a href="<?php echo site_url('/admin') ?>">Backend</a></li>
+            <?php endif; ?>
             <li <?php echo check_method('profile'); ?>><a href="<?php echo site_url('/users/profile'); ?>"> <?php e(lang('bf_user_settings')); ?> </a></li>
             <li><a href="<?php echo site_url('/logout') ?>"><?php e( lang('bf_action_logout')); ?></a></li>
         <?php endif; ?>

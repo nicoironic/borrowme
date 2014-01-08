@@ -65,7 +65,7 @@ class resources extends Admin_Controller
 
 		Template::set('records', $records);
 		Template::set('toolbar_title', 'Manage Items');
-        Template::set_view('resources/edit');
+        Template::set_view('resources/index');
 		Template::render();
 	}
 
@@ -99,6 +99,7 @@ class resources extends Admin_Controller
 		Assets::add_module_js('items', 'items.js');
 
 		Template::set('toolbar_title', lang('items_create') . ' Items');
+        Template::set_view('resources/edit');
 		Template::render();
 	}
 
@@ -156,6 +157,7 @@ class resources extends Admin_Controller
 		}
 		Template::set('items', $this->items_model->find($id));
 		Template::set('toolbar_title', lang('items_edit') .' Items');
+        Template::set_view('resources/edit');
 		Template::render();
 	}
 

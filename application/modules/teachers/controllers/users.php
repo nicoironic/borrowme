@@ -64,6 +64,11 @@ class users extends Admin_Controller
 
 		$records = $this->teachers_model->find_all();
 
+        foreach($records as $row) {
+            $user = $this->user_model->find($row->user_id);
+            $row->email = $user->email;
+        }
+
 		Template::set('records', $records);
 		Template::set('toolbar_title', 'Manage Teachers');
 		Template::render();
@@ -227,6 +232,7 @@ class users extends Admin_Controller
                 $data['password']               = $this->input->post('teachers_password');
                 $data['display_name']           = $this->input->post('teachers_username');
                 $data['active']                 = 1;
+                $data['role_desc']              = 'teacher';
 
                 if ($user_id = $this->user_model->insert($data)) {
                     $data               = array();

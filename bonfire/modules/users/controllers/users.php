@@ -45,6 +45,9 @@ class Users extends Front_Controller
 		$this->load->library('form_validation');
 
 		$this->load->model('users/user_model');
+        $this->load->model('students/students_model', null, true);
+        $this->load->model('teachers/teachers_model', null, true);
+        $this->load->model('lab_incharge/lab_incharge_model', null, true);
 
 		$this->load->library('users/auth');
 
@@ -297,6 +300,36 @@ class Users extends Front_Controller
         // Generate password hint messages.
 		$this->user_model->password_hints();
 
+        switch($user->role_desc) {
+            case 'lab_incharge':
+                $labincharge = $this->lab_incharge_model->find_by('user_id',$user->id);
+                $user->firstname        = $labincharge->firstname;
+                $user->lastname         = $labincharge->lastname;
+                $user->address          = $labincharge->address;
+                $user->contact_details  = $labincharge->contact_details;
+            break;
+            case 'student':
+                $student = $this->students_model->find_by('user_id',$user->id);
+                $user->firstname        = $student->firstname;
+                $user->lastname         = $student->lastname;
+                $user->address          = $student->address;
+                $user->contact_details  = $student->contact_details;
+            break;
+            case 'teacher':
+                $teacher = $this->teachers_model->find_by('user_id',$user->id);
+                $user->firstname        = $teacher->firstname;
+                $user->lastname         = $teacher->lastname;
+                $user->address          = $teacher->address;
+                $user->contact_details  = $teacher->contact_details;
+            break;
+            default:
+                $user->firstname        = '';
+                $user->lastname         = '';
+                $user->address          = '';
+                $user->contact_details  = '';
+            break;
+        }
+
 		Template::set('user', $user);
 		Template::set('languages', unserialize($this->settings_lib->item('site.languages')));
 
@@ -455,8 +488,8 @@ class Users extends Front_Controller
 			$this->form_validation->set_rules('password', 'lang:bf_password', 'required|max_length[120]|valid_password');
 			$this->form_validation->set_rules('pass_confirm', 'lang:bf_password_confirm', 'required|matches[password]');
 
-			$this->form_validation->set_rules('language', 'lang:bf_language', 'required|trim');
-			$this->form_validation->set_rules('timezones', 'lang:bf_timezone', 'required|trim|max_length[4]');
+			$this->form_validation->set_rules('language', 'lang:bf_language', 'trim');
+			$this->form_validation->set_rules('timezones', 'lang:bf_timezone', 'trim|max_length[4]');
 			$this->form_validation->set_rules('display_name', 'lang:bf_display_name', 'trim|max_length[255]');
 
 
@@ -468,6 +501,9 @@ class Users extends Front_Controller
 						&& isset($this->current_user) && $this->current_user->role_id == 1))
 					&& (!isset($field['frontend']) || $field['frontend'] === TRUE))
 				{
+                    if($field['name'] == 'country') {
+                        $field['rules'] = str_replace('required|','',$field['rules']);
+                    }
 					$this->form_validation->set_rules($field['name'], $field['label'], $field['rules']);
 
 					$meta_data[$field['name']] = $this->input->post($field['name']);
@@ -483,6 +519,7 @@ class Users extends Front_Controller
 						'language'		=> $this->input->post('language'),
 						'timezone'		=> $this->input->post('timezones'),
 						'display_name'	=> $this->input->post('display_name'),
+                        'role_id'       => 4,
 					);
 
 				if (isset($_POST['username']))
@@ -655,8 +692,8 @@ class Users extends Front_Controller
 		}
 		$this->form_validation->set_rules('username', 'lang:bf_username', $username_required . 'trim|max_length[30]|unique[users.username,users.id]');
 
-		$this->form_validation->set_rules('language', 'lang:bf_language', 'required|trim');
-		$this->form_validation->set_rules('timezones', 'lang:bf_timezone', 'required|trim|max_length[4]');
+		$this->form_validation->set_rules('language', 'lang:bf_language', 'trim');
+		$this->form_validation->set_rules('timezones', 'lang:bf_timezone', 'trim|max_length[4]');
 		$this->form_validation->set_rules('display_name', 'lang:bf_display_name', 'trim|max_length[255]');
 
 		// Added Event "before_user_validation" to run before the form validation
@@ -670,6 +707,9 @@ class Users extends Front_Controller
 					&& isset($this->current_user) && $this->current_user->role_id == 1))
 				&& (!isset($field['frontend']) || $field['frontend'] === TRUE))
 			{
+                if($field['name'] == 'country') {
+                    $field['rules'] = str_replace('required|','',$field['rules']);
+                }
 				$this->form_validation->set_rules($field['name'], $field['label'], $field['rules']);
 			}
 		}
