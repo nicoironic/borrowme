@@ -1,35 +1,72 @@
-<ul class="pagination">
-    <li><a href="#">&laquo;</a></li>
-    <li><a href="#">1</a></li>
-    <li><a href="#">2</a></li>
-    <li><a href="#">3</a></li>
-    <li><a href="#">4</a></li>
-    <li><a href="#">5</a></li>
-    <li><a href="#">&raquo;</a></li>
-</ul>
-
 <div class="jumbotron" text-align="center">
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span8">
                 <div class="items-container">
-                    &nbsp;
-                </div>
+                    <div class="left-header">
+                        <h3>Items</h3>
+                        <div class="input-prepend">
+                            <span class="add-on"><i class="icon-search"></i></span>
+                            <input class="span10" id="search-products" type="text" placeholder="Search" name="search-products-name">
+                        </div>
+                    </div>
 
-                <div class="paginator">
-                    <ul class="pagination">
-                        <li><a href="#">&laquo;</a></li>
-                        <li><a href="#">1</a></li>
-                        <li><a href="#">2</a></li>
-                        <li><a href="#">3</a></li>
-                        <li><a href="#">4</a></li>
-                        <li><a href="#">5</a></li>
-                        <li><a href="#">&raquo;</a></li>
-                    </ul>
-                <div>
+                    <div class="mini-layout list-container">
+                        <div class="pbox-row">
+                            <div class="pbox">
+                                <div>
+                                    <img src="<?php echo Template::theme_url('images/conical-flask.jpg') ?>" class="img-polaroid">
+                                </div>
+                                <div class="item-name" thisid="1">Conical Flask</div>
+                                <div>
+                                    <span>Quantity:</span> <span class="actual-quantity">8</span>
+                                </div>
+                                <div>
+                                    <a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-">
+                                        <i class="icon-shopping-cart icon-white"></i> Add to cart
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pagination">
+                            <ul>
+                                <li><a href="javascript:void(0);">Prev</a></li>
+                                <li><a href="javascript:void(0);">1</a></li>
+                                <li><a href="javascript:void(0);">2</a></li>
+                                <li><a href="javascript:void(0);">3</a></li>
+                                <li><a href="javascript:void(0);">4</a></li>
+                                <li><a href="javascript:void(0);">5</a></li>
+                                <li><a href="javascript:void(0);">Next</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="span4">
-                Ironic
+
+            <div class="span4 mini-layout right-content">
+                <div class="right-header">
+                    <h4>Summary</h4>
+                    <hr/>
+
+                    <div class="summary-list">
+                    </div>
+
+                    <div class="below-content">
+                        <div class="summary-total">
+                            <span class="label-total">
+                                Total:
+                            </span>
+                            <span class="label-total-quantity">
+                                0.00
+                            </span>
+                        </div>
+
+                        <div class="summary-checkout">
+                            <button type="button" class="btn btn-primary">Checkout these items</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

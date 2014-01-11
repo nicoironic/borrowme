@@ -221,6 +221,8 @@
 	// Path to the front controller (this file)
 	define('FCPATH', str_replace(SELF, '', __FILE__));
 
+    define('SERVERPATH',str_replace(SELF,'',FCPATH));
+
 	// Name of the "system folder"
 	define('SYSDIR', trim(strrchr(trim(BASEPATH, '/'), '/'), '/'));
 

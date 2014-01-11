@@ -39,6 +39,7 @@ class Home extends CI_Controller
 		$this->load->library('Assets');
 		$this->lang->load('application');
 		$this->load->library('events');
+        $this->load->model('items/items_model', null, true);
 	}
 
 	//--------------------------------------------------------------------
@@ -51,6 +52,10 @@ class Home extends CI_Controller
 	public function index()
 	{
 		$this->load->library('installer_lib');
+        Assets::add_js('codeigniter-csrf.js');
+        Assets::add_css(array(Template::theme_url('css/docs.css')));
+        Assets::add_css(array(Template::theme_url('css/index.css')));
+        Assets::add_js(Template::theme_url('js/index.js'), 'external', true);
 
 		if (!$this->installer_lib->is_installed())
 		{
@@ -64,6 +69,62 @@ class Home extends CI_Controller
 	}//end index()
 
 	//--------------------------------------------------------------------
+
+    public function item_list_ajax() {
+        $body = '';
+        $this->items_model->offset(0);
+        $this->items_model->limit(10);
+        $items = $this->items_model->find_all();
+
+        $count = count($items) / 5;
+        if($count < 2) {
+            $body = '<div class="pbox-row">';
+            for($x=0;$x<count($items);$x++) {
+                $path = '/userfiles/item-'.$items[$x]->id.'/photos/'.$items[$x]->photo;
+                $body .= '<div class="pbox">
+                                <div>
+                                    <img src="'.$path.'" class="img-polaroid">
+                                </div>
+                                <div class="item-name" thisid="'.$items[$x]->id.'">'.$items[$x]->name.'</div>
+                                <div>
+                                    <span>Quantity:</span> <span class="actual-quantity">'.$items[$x]->quantity.'</span>
+                                </div>
+                                <div>
+                                    <a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
+                                        <i class="icon-shopping-cart icon-white"></i> Add to cart
+                                    </a>
+                                </div>
+                            </div>';
+            }
+            $body .= '</div>';
+        }
+        else if($count == 2) {
+            $body = '<div class="pbox-row">';
+            for($x=0;$x<$count;$x++) {
+                for($y=0;$y<5;$y++) {
+                    $num = $x * 5;
+                    $path = '/userfiles/item-'.$items[$y+$num]->id.'/photos/'.$items[$y+$num]->photo;
+                    $body .= '<div class="pbox">
+                                <div>
+                                    <img src="'.$path.'" class="img-polaroid">
+                                </div>
+                                <div class="item-name" thisid="'.$items[$y+$num]->id.'">'.$items[$y+$num]->name.'</div>
+                                <div>
+                                    <span>Quantity:</span> <span class="actual-quantity">'.$items[$y+$num]->quantity.'</span>
+                                </div>
+                                <div>
+                                    <a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$y+$num]->id.'">
+                                        <i class="icon-shopping-cart icon-white"></i> Add to cart
+                                    </a>
+                                </div>
+                            </div>';
+                }
+            }
+            $body .= '</div>';
+        }
+
+        die($body);
+    }
 
 	/**
 	 * If the Auth lib is loaded, it will set the current user, since users

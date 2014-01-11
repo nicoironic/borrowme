@@ -121,6 +121,58 @@ class resources extends Admin_Controller
 			redirect(SITE_AREA .'/resources/items');
 		}
 
+        if ($this->input->post('file')) {
+            if( $_FILES['file']['name'] != "" ) {
+
+                $item_id = $id;
+                $item = $this->items_model->find($item_id);
+                $filename = $_FILES['file']['name'];
+                $path = '/userfiles/item-'.$item_id.'/photos';
+
+                if($item) {
+                    $recent = $item->photo;
+                    if($recent != '') {
+                        if(file_exists(SERVERPATH.'/'.$path.'/thumbnail/'.$recent))
+                            unlink(SERVERPATH.'/'.$path.'/thumbnail/'.$recent);
+                        if(file_exists(SERVERPATH.'/'.$path.'/'.$recent))
+                            unlink(SERVERPATH.'/'.$path.'/'.$recent);
+                    }
+
+                    $tempFile = $_FILES['file']['tmp_name'];
+                    $targetPath = $_SERVER['DOCUMENT_ROOT'] . $path;
+                    $targetFile = rtrim($targetPath,'/') . '/' . $_FILES['file']['name'];
+
+                    $fileParts = pathinfo($_FILES['file']['name']);
+
+                    if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id)) {
+                        mkdir($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id, 0777, true);
+                    }
+                    if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id.'/photos')) {
+                        mkdir($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id.'/photos', 0777, true);
+                    }
+                    if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id.'/photos/thumbnails')) {
+                        mkdir($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id.'/photos/thumbnails', 0777, true);
+                    }
+
+                    // Validate the file type
+                    $fileTypes = array('JPG','JPEG','GIF','PNG','TIF'); // File extensions
+
+                    if (in_array(strtoupper($fileParts['extension']),$fileTypes)) {
+                        move_uploaded_file($tempFile,$targetFile);
+                    } else {
+                        return false;
+                    }
+
+
+                }
+                $success = $this->items_model->update($id, array('photo' => $filename));
+
+                $result = array(
+                    'result' => $success,
+                );
+            }
+        }
+
 		if (isset($_POST['save']))
 		{
 			$this->auth->restrict('Items.Resources.Edit');

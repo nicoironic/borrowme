@@ -21,7 +21,7 @@ $id = isset($items['id']) ? $items['id'] : '';
 ?>
 <div class="admin-box">
 	<h3>Items</h3>
-	<?php echo form_open($this->uri->uri_string(), 'class="form-horizontal"'); ?>
+	<?php echo form_open($this->uri->uri_string(), 'class="form-horizontal" enctype="multipart/form-data"'); ?>
 		<fieldset>
 
 			<div class="control-group <?php echo form_error('name') ? 'error' : ''; ?>">
@@ -64,6 +64,23 @@ $id = isset($items['id']) ? $items['id'] : '';
 
 				echo form_dropdown('items_status', $options, set_value('items_status', isset($items['status']) ? $items['status'] : ''), 'Status'. lang('bf_form_label_required'));
 			?>
+
+            <?php
+            if (isset($items)):
+            ?>
+            <div class="control-group <?php echo form_error('Photo') ? 'error' : ''; ?>">
+                <?php echo form_label('Photo', 'photo', array('class' => 'control-label') ); ?>
+                <div class='controls'>
+                    <?php if($items['photo'] != ''): ?>
+                        <img src="<?php echo '/userfiles/item-'.$items['id'].'/photos/'.$items['photo'] ?>" alt="" style="width: 200px;">
+                    <?php endif; ?>
+                    <input type="file" name="file" id="file">
+                    <span class='help-inline'><?php echo form_error('photo'); ?></span>
+                </div>
+            </div>
+            <?php
+            endif;
+            ?>
 
 			<div class="form-actions">
 				<input type="submit" name="save" class="btn btn-primary" value="<?php echo lang('items_action_edit'); ?>"  />

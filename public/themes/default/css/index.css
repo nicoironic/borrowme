@@ -1,0 +1,107 @@
+div.left-header {
+
+}
+div.left-header h3 {
+    float: left;
+    margin-top: 0;
+}
+div.left-header div.input-prepend {
+    float: right;
+}
+div.items-container div.list-container {
+    clear: both;
+}
+div.right-content {
+    padding-left: 0;
+    padding-right: 0;
+    position: relative;
+    height: auto;
+}
+div.pbox-row {
+    margin-bottom: 40px;
+    width: 100%;
+    display: -moz-box;
+    display: -webkit-box;
+    display: box;
+    -webkit-box-align: end;
+}
+div.pbox {
+    text-align: center;
+    margin: 0px 8px;
+    -moz-box-flex: 1.0;
+    -webkit-box-flex: 1.0;
+    box-flex: 1.0;
+    text-align: center;
+    max-width: 130px;
+    width: 130px;
+}
+img.img-polaroid {
+    max-width: 100px !important;
+    max-height: 100px !important;
+    width: auto !important;
+    border-radius: 4px;
+    height: auto !important;
+    margin-bottom: 10px;
+}
+div.pbox .item-name {
+    display: -webkit-box;
+    -webkit-box-pack: center;
+    -webkit-box-align: center;
+    height: 40px;
+}
+a.buy-item {
+    padding: 2px 8px;
+}
+div.summary-list {
+    padding-bottom: 100px;
+}
+div.summary-item {
+    background-color: #eee;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    margin-bottom: 8px;
+}
+div.summary-item div.summary-item-header {
+    padding-top: 5px;
+}
+div.summary-item div.summary-item-header span.item-name {
+    font-weight: bold;
+    float: left;
+    padding-left: 5px;
+}
+div.summary-item div.summary-item-header div.close {
+    padding-right: 5px;
+}
+div.summary-item-details {
+    clear: both;
+}
+div.summary-item-details input.custom-span-width {
+    width: 8.982905982905983%;
+    margin-bottom: 2px;
+}
+div.summary-item-details {
+    text-align: left;
+    padding: 0 5px 6px 5px;
+}
+div.summary-total {
+    font-weight: bold;
+    font-size: large;
+    padding: 0 5px;
+}
+div.summary-total span.label-total {
+    float: left;
+}
+div.summary-total span.label-total-quantity {
+    float: right;
+}
+div.below-content {
+    bottom: 0;
+    position: absolute;
+    width: 94.45299145299145%;
+    margin: 0 10px 15px;
+}
+div.below-content div.summary-checkout {
+    clear: both;
+    margin-top: 35px;
+}
