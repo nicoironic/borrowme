@@ -41,6 +41,10 @@
 $route['default_controller'] = "home";
 $route['404_override'] = '';
 
+// Items
+$route['add-item']              = 'home/add_item';
+$route['return-item']           = 'home/return_item';
+
 // Authentication
 $route[LOGIN_URL]				= 'users/login';
 $route[REGISTER_URL]            = 'users/register';

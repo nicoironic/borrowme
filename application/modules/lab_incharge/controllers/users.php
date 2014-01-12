@@ -64,10 +64,13 @@ class users extends Admin_Controller
 
 		$records = $this->lab_incharge_model->find_all();
 
-        foreach($records as $row) {
-            $user = $this->user_model->find($row->user_id);
-            $row->email = $user->email;
+        if(!empty($records)) {
+            foreach($records as $row) {
+                $user = $this->user_model->find($row->user_id);
+                $row->email = $user->email;
+            }
         }
+
 
 		Template::set('records', $records);
 		Template::set('toolbar_title', 'Manage Lab Incharge');

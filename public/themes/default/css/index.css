@@ -8,8 +8,13 @@ div.left-header h3 {
 div.left-header div.input-prepend {
     float: right;
 }
+div.items-container {
+    position: relative;
+}
 div.items-container div.list-container {
     clear: both;
+    height: auto;
+    min-height: 300px;
 }
 div.right-content {
     padding-left: 0;
@@ -104,4 +109,9 @@ div.below-content {
 div.below-content div.summary-checkout {
     clear: both;
     margin-top: 35px;
+}
+div.preloader {
+    position: absolute;
+    top: 45%;
+    left: 48%;
 }

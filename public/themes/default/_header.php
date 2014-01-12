@@ -20,5 +20,12 @@
     <?php echo Assets::css(); ?>
 
     <link rel="shortcut icon" href="<?php echo base_url(); ?>favicon.ico">
+
+    <style>
+        ul.dropdown-menu-custom {
+            right: 11.5% !important;
+            top: 7%;
+        }
+    </style>
 </head>
 <body>

@@ -16,6 +16,12 @@
 
 <!-- This would be a good place to use a CDN version of jQueryUI if needed -->
 <?php echo Assets::js(); ?>
-
+<script type="text/javascript">
+    $( document ).ready(function() {
+        $('a#dropdown-custom').click(function() {
+            $('ul.dropdown-menu-custom').toggle();
+        });
+    });
+</script>
 </body>
 </html>
