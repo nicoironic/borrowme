@@ -14,6 +14,7 @@ function item_list(mode) {
     if(mode == '')
         mode = 'all';
 
+    $('div.processing').css('visibility','visible');
     $.ajax({
         type : "post",
         url : '/home/return_item_list_ajax',
@@ -26,7 +27,7 @@ function item_list(mode) {
             item_controls();
         },
         complete: function() {
-            $('div.preloader').hide();
+            $('div.processing').css('visibility','hidden');
         }
     });
 }
