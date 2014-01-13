@@ -4,51 +4,37 @@
         <h4 class="alert-heading">Piece of advice...</h4>
         Always return your borrowed items after <b>use</b>.
     </div>
+
+    <ul class="nav nav-pills">
+        <li class="active">
+            <a href="javascript:void(0);" class="status" status="all">All</a>
+        </li>
+        <li>
+            <a href="javascript:void(0);" class="status" status="lacking">Lacking</a>
+        </li>
+        <li>
+            <a href="javascript:void(0);" class="status" status="returned">Returned</a>
+        </li>
+    </ul>
+
     <div class="row-fluid">
-        <div class="span12">
-            <table class="table table-bordered">
+        <div class="span12" style="position: relative;">
+            <div class="processing">
+                <img src="<?php echo Template::theme_url('images/loading.gif'); ?>">
+            </div>
+            <table class="table table-bordered" id="returned-items-table">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Item</th>
-                        <th>Qty</th>
+                        <th>Current Qty</th>
                         <th>Borrowed Qty</th>
                         <th>Returned Qty</th>
                         <th>Status</th>
                         <th>&nbsp;</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Burrete</td>
-                        <td class="align-right">10</td>
-                        <td class="align-right">5</td>
-                        <td class="align-right">5</td>
-                        <td>Returned</td>
-                        <td class="align-right">
-                            <div class="input-append input-prepend">
-                                <span class="add-on">Pieces</span>
-                                <input class="align-right span5 return-qty" type="text" value="0">
-                                <button class="btn btn-success return-btn" type="button">Return</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Connical Flask</td>
-                        <td class="align-right">15</td>
-                        <td class="align-right">5</td>
-                        <td class="align-right">0</td>
-                        <td>Lacking</td>
-                        <td class="align-right">
-                            <div class="input-append input-prepend">
-                                <span class="add-on">Pieces</span>
-                                <input class="align-right span5 return-qty" type="text" value="0">
-                                <button class="btn btn-success return-btn" type="button">Return</button>
-                            </div>
-                        </td>
-                    </tr>
+                <tbody id="dynamic-tbody">
                 </tbody>
             </table>
         </div>

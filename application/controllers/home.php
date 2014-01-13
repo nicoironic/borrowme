@@ -45,6 +45,9 @@ class Home extends CI_Controller
 		$this->load->library('events');
         $this->lang->load('application');
         $this->load->model('items/items_model', null, true);
+        $this->load->model('returned_items/returned_items_model', null, true);
+
+        Assets::add_js('codeigniter-csrf.js');
 	}
 
 	//--------------------------------------------------------------------
@@ -57,7 +60,6 @@ class Home extends CI_Controller
 	public function index()
 	{
 		$this->load->library('installer_lib');
-        Assets::add_js('codeigniter-csrf.js');
         Assets::add_css(array(Template::theme_url('css/docs.css')));
         Assets::add_css(array(Template::theme_url('css/index.css')));
         Assets::add_js(Template::theme_url('js/index.js'), 'external', true);
@@ -186,6 +188,117 @@ class Home extends CI_Controller
         Template::render();
     }
 
+    public function return_item_ajax() {
+        $itemid     = $this->input->post('id');
+        $quantity   = $this->input->post('qty');
+        $status     = 'lacking';
+
+        $item       = $this->returned_items_model->find($itemid);
+        if($item->return_qty > 0 && $item->return_qty != '') {
+            $quantity = $quantity + $item->return_qty;
+            if($quantity >= $item->quantity) {
+                $quantity   = $item->quantity;
+                $status     = 'returned';
+            }
+        }
+        else {
+            if($quantity >= $item->quantity) {
+                $quantity   = $item->quantity;
+                $status     = 'returned';
+            }
+        }
+
+        $data = array(
+            'return_qty'    => $quantity,
+            'status'        => $status
+        );
+        $this->db->where('id', $itemid);
+        $this->db->update('bf_returned_items', $data);
+
+        $realitem   = $this->items_model->find($item->item_id);
+        $data = array(
+            'quantity'      => ($realitem->quantity + $quantity)
+        );
+        $this->db->where('id', $realitem->id);
+        $this->db->update('bf_items', $data);
+
+        $result = array(
+            'quantity'  => $quantity,
+            'status'    => $status,
+            'result'    => 'success'
+        );
+
+        die(json_encode($result));
+    }
+
+    public function return_item_list_ajax() {
+        $this->load->model('lab_incharge/lab_incharge_model', null, true);
+        $this->load->model('students/students_model', null, true);
+
+        $body       = '';
+        $type       = $this->input->post('type');
+
+        $user       = $this->auth->user();
+        $worker     = $this->lab_incharge_model->find_by('user_id',$user->id);
+        if(!empty($worker)) {
+            $this->returned_items_model->where('worker_id',$worker->worker_id);
+        }
+        $student    = $this->students_model->find_by('user_id',$user->id);
+        if(!empty($student)) {
+            $this->returned_items_model->where('student_id',$student->student_id);
+        }
+
+        switch($type) {
+            case 'lacking':
+                $items = $this->returned_items_model->find_all_by('status','lacking');
+            break;
+            case 'returned':
+                $items = $this->returned_items_model->find_all_by('status','returned');
+            break;
+            default:
+                $items = $this->returned_items_model->find_all();
+            break;
+        }
+
+        if(!empty($items)) {
+            foreach($items as $row) {
+                $disabled = '';
+                $item = $this->items_model->find($row->item_id);
+                if($row->status == 'returned') {
+                    $disabled = 'disabled';
+                }
+                $body .= '<tr>
+                        <td>'.$row->id.'<input type="hidden" class="item-id" value="'.$row->id.'"></td>
+                        <td>'.$item->name.'</td>
+                        <td class="align-right">'.$item->quantity.'</td>
+                        <td class="align-right">'.$row->quantity.'<input type="hidden" class="borrow-qty" value="'.$row->quantity.'"></td>
+                        <td class="align-right"><span class="span-return-qty">'.$row->return_qty.'</span><input type="hidden" class="return-qty" value="'.$row->return_qty.'"></td>
+                        <td><span class="span-status">'.$row->status.'</span></td>
+                        <td class="align-right">
+                            <div class="input-append input-prepend">
+                                <span class="add-on">Pieces</span>
+                                <input class="align-right span5 return-qty" type="text" value="0" '.$disabled.'>
+                                <button class="btn btn-success return-btn" type="button" '.$disabled.'>Return</button>
+                            </div>
+                        </td>
+                    </tr>';
+            }
+        }
+        else {
+            $body .= '<tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td class="align-right">&nbsp;</td>
+                        <td class="align-right">&nbsp;</td>
+                        <td class="align-right">&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td class="align-right">&nbsp;</td>
+                    </tr>';
+        }
+
+        die($body);
+    }
+
     public function item_list_ajax() {
         $body   = '';
         $page   = $this->input->post('page');
@@ -307,7 +420,6 @@ class Home extends CI_Controller
     }
 
     public function items_checkout_ajax() {
-        $this->load->model('returned_items/returned_items_model', null, true);
         $this->load->model('lab_incharge/lab_incharge_model', null, true);
         $this->load->model('students/students_model', null, true);
 
@@ -338,7 +450,7 @@ class Home extends CI_Controller
                     'worker_id' => $worker->worker_id,
                     'item_id'   => $items[$x]['id'],
                     'quantity'  => $items[$x]['qty'],
-                    'staus'     => 'lacking',
+                    'status'     => 'lacking',
                     'created_on'    => date('Y-m-d H:i:s'),
                     'modified_on'   => date('Y-m-d H:i:s')
                 );
@@ -356,7 +468,7 @@ class Home extends CI_Controller
                     'student_id'    => $student->student_id,
                     'item_id'       => $items[$x]['id'],
                     'quantity'      => $items[$x]['qty'],
-                    'staus'         => 'lacking',
+                    'status'         => 'lacking',
                     'created_on'    => date('Y-m-d H:i:s'),
                     'modified_on'   => date('Y-m-d H:i:s')
                 );
