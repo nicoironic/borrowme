@@ -21,7 +21,8 @@
         <?php endif; ?>
     </ul>
 
-    <h3 class="muted"><?php if (class_exists('Settings_lib')) e(settings_item('site.title')); else echo 'Bonfire'; ?></h3>
+    <img src="<?php echo Template::theme_url('images/logo.jpg'); ?>" class="project-logo">
+    <h3 class="muted">IRSCL</h3>
 </div>
 
 <hr />

@@ -9,7 +9,7 @@
             <div class="control-group <?php echo form_error('name') ? 'error' : ''; ?>">
                 <?php echo form_label('Name'. lang('bf_form_label_required'), 'items_name', array('class' => 'control-label') ); ?>
                 <div class='controls'>
-                    <input id='items_name' type='text' name='items_name' maxlength="255" value="<?php echo set_value('items_name', isset($items['name']) ? $items['name'] : ''); ?>" />
+                    <input class="span6" id='items_name' type='text' name='items_name' maxlength="255" value="<?php echo set_value('items_name', isset($items['name']) ? $items['name'] : ''); ?>" />
                     <span class='help-inline'><?php echo form_error('name'); ?></span>
                 </div>
             </div>
@@ -17,7 +17,7 @@
             <div class="control-group <?php echo form_error('description') ? 'error' : ''; ?>">
                 <?php echo form_label('Description', 'items_description', array('class' => 'control-label') ); ?>
                 <div class='controls'>
-                    <?php echo form_textarea( array( 'name' => 'items_description', 'id' => 'items_description', 'rows' => '5', 'cols' => '80', 'value' => set_value('items_description', isset($items['description']) ? $items['description'] : '') ) ); ?>
+                    <?php echo form_textarea( array( 'class' => 'span6', 'name' => 'items_description', 'id' => 'items_description', 'rows' => '5', 'cols' => '80', 'value' => set_value('items_description', isset($items['description']) ? $items['description'] : '') ) ); ?>
                     <span class='help-inline'><?php echo form_error('description'); ?></span>
                 </div>
             </div>
@@ -25,7 +25,7 @@
             <div class="control-group <?php echo form_error('specifications') ? 'error' : ''; ?>">
                 <?php echo form_label('Specifications', 'items_specifications', array('class' => 'control-label') ); ?>
                 <div class='controls'>
-                    <?php echo form_textarea( array( 'name' => 'items_specifications', 'id' => 'items_specifications', 'rows' => '5', 'cols' => '80', 'value' => set_value('items_specifications', isset($items['specifications']) ? $items['specifications'] : '') ) ); ?>
+                    <?php echo form_textarea( array( 'class' => 'span6', 'name' => 'items_specifications', 'id' => 'items_specifications', 'rows' => '5', 'cols' => '80', 'value' => set_value('items_specifications', isset($items['specifications']) ? $items['specifications'] : '') ) ); ?>
                     <span class='help-inline'><?php echo form_error('specifications'); ?></span>
                 </div>
             </div>
@@ -33,7 +33,7 @@
             <div class="control-group <?php echo form_error('quantity') ? 'error' : ''; ?>">
                 <?php echo form_label('Quantity', 'items_quantity', array('class' => 'control-label') ); ?>
                 <div class='controls'>
-                    <input id='items_quantity' type='text' name='items_quantity' maxlength="255" value="<?php echo set_value('items_quantity', isset($items['quantity']) ? $items['quantity'] : ''); ?>" />
+                    <input class="span6" id='items_quantity' type='text' name='items_quantity' maxlength="255" value="<?php echo set_value('items_quantity', isset($items['quantity']) ? $items['quantity'] : ''); ?>" />
                     <span class='help-inline'><?php echo form_error('quantity'); ?></span>
                 </div>
             </div>
@@ -44,7 +44,7 @@
                 'Inactive' => 'Inactive',
             );
 
-            echo form_dropdown('items_status', $options, set_value('items_status', isset($items['status']) ? $items['status'] : ''), 'Status'. lang('bf_form_label_required'));
+            echo form_dropdown('items_status', $options, set_value('items_status', isset($items['status']) ? $items['status'] : ''), 'Status'. lang('bf_form_label_required'), 'class="span6"');
             ?>
 
             <div class="control-group <?php echo form_error('Photo') ? 'error' : ''; ?>">

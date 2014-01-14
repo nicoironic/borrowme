@@ -16,7 +16,7 @@ $( document ).ready(function() {
     other_events();
 });
 
-function item_list() {
+function item_list(search) {
     $('div.preloader').show();
 
     $.ajax({
@@ -24,7 +24,8 @@ function item_list() {
         url : '/home/item_list_ajax',
         data: {
             "ci_csrf_token"	: ci_csrf_token(),
-            "page"          : 0
+            "page"          : 0,
+            "search"        : search
         },
         success: function(result,status,xhr) {
             $('div.list-container').html(result);
@@ -69,7 +70,7 @@ function item_events() {
             var item    = $(parent).find('div.item-name').text();
             var qty     = $(parent).find('span.actual-quantity').text();
 
-            var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1"/></div></div>';
+            var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1" readonly/></div></div>';
 
             if(qty > 0) {
                 var result  = check_commons(itemid);
@@ -86,12 +87,20 @@ function item_events() {
 }
 
 function other_events() {
+    $( "input#search-products" ).keyup(function() {
+        item_list($(this).val());
+    });
+
     $('button#checkout').click(function() {
         if(user_id == '' || user_id == 0) {
             window.location.replace(current_url()+'login');
         }
         else {
             var items = [];
+            if($('div.summary-list div.summary-item').length <= 0) {
+                return false;
+            }
+
             $('div.summary-list div.summary-item').each(function() {
                 var itemid      = $(this).find('div.summary-item-details input#item-id').val();
                 var quantity    = $(this).find('div.summary-item-details input#borrow-quantity').val();

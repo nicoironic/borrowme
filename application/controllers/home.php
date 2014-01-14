@@ -47,6 +47,7 @@ class Home extends CI_Controller
         $this->load->model('items/items_model', null, true);
         $this->load->model('returned_items/returned_items_model', null, true);
 
+        Assets::add_css(array(Template::theme_url('css/always.css')));
         Assets::add_js('codeigniter-csrf.js');
 	}
 
@@ -302,79 +303,92 @@ class Home extends CI_Controller
     public function item_list_ajax() {
         $body   = '';
         $page   = $this->input->post('page');
+        $search = $this->input->post('search');
+        $search = trim($search);
+
         $page   = $page-2 < 0 ? 0 : (($page+10)-2);
         $this->items_model->offset($page);
         $this->items_model->limit(10);
+
+        if($search != '')
+            $this->items_model->like('name',$search,'both');
+
         $items  = $this->items_model->find_all();
-        //die($this->db->last_query());
 
-        $count  = count($items) / 5;
-        if($count < 2) {
-            $body .= '<div class="pbox-row">';
-            for($x=0;$x<count($items);$x++) {
-                if($items[$x]->photo == '')
-                    $path = Template::theme_url('images/default.png');
-                else
-                    $path = '/userfiles/item-'.$items[$x]->id.'/photos/'.$items[$x]->photo;
-
-                $body .= '<div class="pbox">
-                                <div>
-                                    <img src="'.$path.'" class="img-polaroid">
-                                </div>
-                                <div class="item-name" thisid="'.$items[$x]->id.'">'.$items[$x]->name.'</div>
-                                <div>
-                                    <span>Quantity:</span> <span class="actual-quantity">'.$items[$x]->quantity.'</span>
-                                </div>
-                                <div>
-                                    <a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
-                                        <i class="icon-shopping-cart icon-white"></i> Add to cart
-                                    </a>
-                                </div>
-                            </div>';
-            }
-            $body .= '</div>';
-        }
-        else if($count == 2) {
-            for($x=0;$x<$count;$x++) {
+        if(!empty($items)) {
+            $count  = count($items) / 5;
+            if($count < 2) {
                 $body .= '<div class="pbox-row">';
-                for($y=0;$y<5;$y++) {
-                    $num = $x * 5;
-                    if($items[$y+$num]->photo == '')
+                for($x=0;$x<count($items);$x++) {
+                    if($items[$x]->photo == '')
                         $path = Template::theme_url('images/default.png');
                     else
-                        $path = '/userfiles/item-'.$items[$y+$num]->id.'/photos/'.$items[$y+$num]->photo;
+                        $path = '/userfiles/item-'.$items[$x]->id.'/photos/'.$items[$x]->photo;
 
                     $body .= '<div class="pbox">
-                                <div>
-                                    <img src="'.$path.'" class="img-polaroid">
-                                </div>
-                                <div class="item-name" thisid="'.$items[$y+$num]->id.'">'.$items[$y+$num]->name.'</div>
-                                <div>
-                                    <span>Quantity:</span> <span class="actual-quantity">'.$items[$y+$num]->quantity.'</span>
-                                </div>
-                                <div>
-                                    <a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$y+$num]->id.'">
-                                        <i class="icon-shopping-cart icon-white"></i> Add to cart
-                                    </a>
-                                </div>
-                            </div>';
+                                    <div>
+                                        <img src="'.$path.'" class="img-polaroid">
+                                    </div>
+                                    <div class="item-name" thisid="'.$items[$x]->id.'">'.$items[$x]->name.'</div>
+                                    <div>
+                                        <span>Quantity:</span> <span class="actual-quantity">'.$items[$x]->quantity.'</span>
+                                    </div>
+                                    <div>
+                                        <a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
+                                            <i class="icon-shopping-cart icon-white"></i> Add to cart
+                                        </a>
+                                    </div>
+                                </div>';
                 }
                 $body .= '</div>';
             }
+            else if($count == 2) {
+                for($x=0;$x<$count;$x++) {
+                    $body .= '<div class="pbox-row">';
+                    for($y=0;$y<5;$y++) {
+                        $num = $x * 5;
+                        if($items[$y+$num]->photo == '')
+                            $path = Template::theme_url('images/default.png');
+                        else
+                            $path = '/userfiles/item-'.$items[$y+$num]->id.'/photos/'.$items[$y+$num]->photo;
+
+                        $body .= '<div class="pbox">
+                                    <div>
+                                        <img src="'.$path.'" class="img-polaroid">
+                                    </div>
+                                    <div class="item-name" thisid="'.$items[$y+$num]->id.'">'.$items[$y+$num]->name.'</div>
+                                    <div>
+                                        <span>Quantity:</span> <span class="actual-quantity">'.$items[$y+$num]->quantity.'</span>
+                                    </div>
+                                    <div>
+                                        <a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$y+$num]->id.'">
+                                            <i class="icon-shopping-cart icon-white"></i> Add to cart
+                                        </a>
+                                    </div>
+                                </div>';
+                    }
+                    $body .= '</div>';
+                }
+            }
+
+            $body = $this->make_pagination($body,0,$search);
         }
 
-        $body = $this->make_pagination($body);
         die($body);
     }
 
-    private function make_pagination($body = '',$page = 0) {
+    private function make_pagination($body = '',$page = 0,$search = '') {
         $pages = '';
         if($page == 0) {
             $this->items_model->offset($page);
+
+            if($search != '') {
+                $this->items_model->like('name',$search,'both');
+            }
             $items  = $this->items_model->find_all();
             $count  = count($items) / 10;
             $ex = explode('.',$count);
-            if($ex[1] != '')
+            if(isset($ex[1]) != '')
                 $count = $ex[0] + 1;
 
             if($count > 3) {

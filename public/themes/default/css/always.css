@@ -1,0 +1,18 @@
+.nav-pills>.active>a, .nav-pills>.active>a:hover, .nav-pills>.active>a:focus {
+    color: #fff !important;
+    background-color: green !important;
+}
+ul.nav-pills a {
+    color: green !important;
+}
+.muted {
+    color: green !important;
+}
+.green-color {
+    color: green !important;
+}
+img.project-logo {
+    width: 50px;
+    float: left;
+    margin-right: 5px;
+}
