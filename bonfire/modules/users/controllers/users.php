@@ -492,6 +492,8 @@ class Users extends Front_Controller
 			$this->form_validation->set_rules('timezones', 'lang:bf_timezone', 'trim|max_length[4]');
 			$this->form_validation->set_rules('display_name', 'lang:bf_display_name', 'trim|max_length[255]');
 
+            $this->form_validation->set_rules('firstname', 'Firstname', 'required');
+            $this->form_validation->set_rules('lastname', 'Lastname', 'required');
 
 			$meta_data = array();
 			foreach ($meta_fields as $field)
@@ -520,6 +522,7 @@ class Users extends Front_Controller
 						'timezone'		=> $this->input->post('timezones'),
 						'display_name'	=> $this->input->post('display_name'),
                         'role_id'       => 4,
+                        'role_desc' 	=> $this->input->post('role_desc'),
 					);
 
 				if (isset($_POST['username']))
@@ -541,6 +544,30 @@ class Users extends Front_Controller
 				{
 					// now add the meta is there is meta data
 					$this->user_model->save_meta_for($user_id, $meta_data);
+
+                    $role_desc = $this->input->post('role_desc');
+                    switch($role_desc) {
+                        case 'labincharge':
+                            $data = array(
+                                'firstname'         => $this->input->post('firstname'),
+                                'lastname'          => $this->input->post('lastname'),
+                                'address'           => $this->input->post('address'),
+                                'contact_details'   => $this->input->post('contact_details'),
+                                'user_id'           => $user_id
+                            );
+                            $this->db->insert('bf_lab_incharge', $data);
+                            break;
+                        case 'student':
+                            $data = array(
+                                'firstname'         => $this->input->post('firstname'),
+                                'lastname'          => $this->input->post('lastname'),
+                                'address'           => $this->input->post('address'),
+                                'contact_details'   => $this->input->post('contact_details'),
+                                'user_id'           => $user_id
+                            );
+                            $this->db->insert('bf_students', $data);
+                            break;
+                    }
 
 					/*
 					 * USER ACTIVATIONS ENHANCEMENT

@@ -16,3 +16,6 @@ img.project-logo {
     float: left;
     margin-right: 5px;
 }
+.bold {
+    font-weight: bold;
+}

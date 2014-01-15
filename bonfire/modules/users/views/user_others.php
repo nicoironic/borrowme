@@ -1,5 +1,5 @@
 <div class="control-group<?php echo iif(form_error('firstname'), $errorClass); ?>">
-    <label class="control-label" for="firstname">First Name</label>
+    <label class="control-label bold" for="firstname">First Name</label>
     <div class="controls">
         <input class="<?php echo $controlClass; ?>" type="text" id="firstname" name="firstname" value="<?php echo set_value('firstname', isset($user) ? $user->firstname : ''); ?>" />
         <span class="help-inline"><?php echo form_error('firstname'); ?></span>
@@ -7,7 +7,7 @@
 </div>
 
 <div class="control-group<?php echo iif(form_error('lastname'), $errorClass); ?>">
-    <label class="control-label" for="lastname">Last Name</label>
+    <label class="control-label bold" for="lastname">Last Name</label>
     <div class="controls">
         <input class="<?php echo $controlClass; ?>" type="text" id="lastname" name="lastname" value="<?php echo set_value('lastname', isset($user) ? $user->lastname : ''); ?>" />
         <span class="help-inline"><?php echo form_error('lastname'); ?></span>

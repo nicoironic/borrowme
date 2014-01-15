@@ -305,6 +305,7 @@ class Home extends CI_Controller
     }
 
     public function item_list_ajax() {
+        $user   = $this->auth->user();
         $body   = '';
         $page   = $this->input->post('page');
         $search = $this->input->post('search');
@@ -329,6 +330,16 @@ class Home extends CI_Controller
                     else
                         $path = '/userfiles/item-'.$items[$x]->id.'/photos/'.$items[$x]->photo;
 
+                    if(($user->role_id) != 1) {
+                        $button = '<a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
+                                        <i class="icon-shopping-cart icon-white"></i> Add to cart
+                                    </a>';
+                    }
+                    else {
+                        $button = '';
+                    }
+
+
                     $body .= '<div class="pbox">
                                     <div>
                                         <img src="'.$path.'" class="img-polaroid">
@@ -338,9 +349,7 @@ class Home extends CI_Controller
                                         <span>Quantity:</span> <span class="actual-quantity">'.$items[$x]->quantity.'</span>
                                     </div>
                                     <div>
-                                        <a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
-                                            <i class="icon-shopping-cart icon-white"></i> Add to cart
-                                        </a>
+                                        '.$button.'
                                     </div>
                                 </div>';
                 }
@@ -356,6 +365,15 @@ class Home extends CI_Controller
                         else
                             $path = '/userfiles/item-'.$items[$y+$num]->id.'/photos/'.$items[$y+$num]->photo;
 
+                        if(isset($user->role_id) != 1) {
+                            $button = '<a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$y+$num]->id.'">
+                                            <i class="icon-shopping-cart icon-white"></i> Add to cart
+                                        </a>';
+                        }
+                        else {
+                            $button = '';
+                        }
+
                         $body .= '<div class="pbox">
                                     <div>
                                         <img src="'.$path.'" class="img-polaroid">
@@ -365,9 +383,7 @@ class Home extends CI_Controller
                                         <span>Quantity:</span> <span class="actual-quantity">'.$items[$y+$num]->quantity.'</span>
                                     </div>
                                     <div>
-                                        <a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$y+$num]->id.'">
-                                            <i class="icon-shopping-cart icon-white"></i> Add to cart
-                                        </a>
+                                        '.$button.'
                                     </div>
                                 </div>';
                     }

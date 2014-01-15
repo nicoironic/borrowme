@@ -34,8 +34,13 @@ p.already-registered {
                 Events::trigger('render_user_form');
                 ?>
                 <!-- Start of User Meta -->
-                <?php //$this->load->view('users/user_meta', array('frontend_only' => true)); ?>
+            <?php $this->load->view('users/user_others', array('frontend_only' => true));?>
                 <!-- End of User Meta -->
+            <?php
+            // Change the values in this array to populate your dropdown as required
+            $options = array('student' => 'Student','labincharge' => 'Lab Incharge');
+            echo form_dropdown('role_desc', $options, set_value('role_desc', isset($returned_items['role_desc']) ? $returned_items['role_desc'] : ''), 'Role');
+            ?>
                 <div class="control-group">
                     <div class="controls">
                         <input class="btn btn-primary" type="submit" name="register" id="submit" value="<?php echo lang('us_register'); ?>"  />
