@@ -250,42 +250,88 @@ class Users extends Front_Controller
 
 		if (isset($_POST['save']))
 		{
+            $this->form_validation->set_rules('email', 'lang:bf_email', 'required|trim|valid_email|max_length[120]');
+            $this->form_validation->set_rules('username', 'lang:bf_username', 'required|trim|max_length[30]');
+            $this->form_validation->set_rules('password', 'lang:bf_password', 'max_length[120]|valid_password');
+            $this->form_validation->set_rules('pass_confirm', 'lang:bf_password_confirm', 'matches[password]');
+            $this->form_validation->set_rules('idnumber', 'ID Number', 'required');
+            $this->form_validation->set_rules('firstname', 'Firstname', 'required');
+            $this->form_validation->set_rules('lastname', 'Lastname', 'required');
 
-			$user_id = $this->current_user->id;
-			if ($this->save_user($user_id, $meta_fields))
-			{
+            if ($this->form_validation->run() !== FALSE) {
+                $user_id = $this->current_user->id;
+                if ($this->save_user($user_id, $meta_fields))
+                {
 
-				$meta_data = array();
-				foreach ($meta_fields as $field)
-				{
-					if ((!isset($field['admin_only']) || $field['admin_only'] === FALSE
-						|| (isset($field['admin_only']) && $field['admin_only'] === TRUE
-							&& isset($this->current_user) && $this->current_user->role_id == 1))
-						&& (!isset($field['frontend']) || $field['frontend'] === TRUE)
-						&& $this->input->post($field['name']) !== FALSE)
-					{
-						$meta_data[$field['name']] = $this->input->post($field['name']);
-					}
-				}
+                    $meta_data = array();
+                    foreach ($meta_fields as $field)
+                    {
+                        if ((!isset($field['admin_only']) || $field['admin_only'] === FALSE
+                            || (isset($field['admin_only']) && $field['admin_only'] === TRUE
+                                && isset($this->current_user) && $this->current_user->role_id == 1))
+                            && (!isset($field['frontend']) || $field['frontend'] === TRUE)
+                            && $this->input->post($field['name']) !== FALSE)
+                        {
+                            $meta_data[$field['name']] = $this->input->post($field['name']);
+                        }
+                    }
 
-				// now add the meta is there is meta data
-				$this->user_model->save_meta_for($user_id, $meta_data);
+                    // now add the meta is there is meta data
+                    $this->user_model->save_meta_for($user_id, $meta_data);
 
-				// Log the Activity
+                    // Log the Activity
+                    $user = $this->user_model->find($user_id);
 
-				$user = $this->user_model->find($user_id);
-				$log_name = (isset($user->display_name) && !empty($user->display_name)) ? $user->display_name : ($this->settings_lib->item('auth.use_usernames') ? $user->username : $user->email);
-				log_activity($this->current_user->id, lang('us_log_edit_profile') . ': ' . $log_name, 'users');
+                    switch($user->role_desc) {
+                        case 'lab_incharge':
+                            $data = array(
+                                'id_number'         =>  $this->input->post('idnumber'),
+                                'firstname'         =>  $this->input->post('firstname'),
+                                'lastname'          =>  $this->input->post('lastname'),
+                                'address'           =>  $this->input->post('address'),
+                                'contact_details'   =>  $this->input->post('contact_details'),
+                            );
+                            $this->db->where('user_id', $user->id);
+                            $this->db->update('bf_lab_incharge', $data);
+                            break;
+                        case 'student':
+                            $data = array(
+                                'id_number'         =>  $this->input->post('idnumber'),
+                                'firstname'         =>  $this->input->post('firstname'),
+                                'lastname'          =>  $this->input->post('lastname'),
+                                'address'           =>  $this->input->post('address'),
+                                'contact_details'   =>  $this->input->post('contact_details'),
+                            );
+                            $this->db->where('user_id', $user->id);
+                            $this->db->update('bf_students', $data);
+                            break;
+                        case 'teacher':
+                            $data = array(
+                                'id_number'         =>  $this->input->post('idnumber'),
+                                'firstname'         =>  $this->input->post('firstname'),
+                                'lastname'          =>  $this->input->post('lastname'),
+                                'address'           =>  $this->input->post('address'),
+                                'contact_details'   =>  $this->input->post('contact_details'),
+                            );
+                            $this->db->where('user_id', $user->id);
+                            $this->db->update('bf_teachers', $data);
+                            break;
+                    }
 
-				Template::set_message(lang('us_profile_updated_success'), 'success');
 
-				// redirect to make sure any language changes are picked up
-				Template::redirect('/users/profile');
-			}
-			else
-			{
-				Template::set_message(lang('us_profile_updated_error'), 'error');
-			}//end if
+                    $log_name = (isset($user->display_name) && !empty($user->display_name)) ? $user->display_name : ($this->settings_lib->item('auth.use_usernames') ? $user->username : $user->email);
+                    log_activity($this->current_user->id, lang('us_log_edit_profile') . ': ' . $log_name, 'users');
+
+                    Template::set_message(lang('us_profile_updated_success'), 'success');
+
+                    // redirect to make sure any language changes are picked up
+                    Template::redirect('/users/profile');
+                }
+                else
+                {
+                    Template::set_message(lang('us_profile_updated_error'), 'error');
+                }//end if
+            }
 		}//end if
 
 		// get the current user information
@@ -303,6 +349,7 @@ class Users extends Front_Controller
         switch($user->role_desc) {
             case 'lab_incharge':
                 $labincharge = $this->lab_incharge_model->find_by('user_id',$user->id);
+                $user->id_number        = $labincharge->id_number;
                 $user->firstname        = $labincharge->firstname;
                 $user->lastname         = $labincharge->lastname;
                 $user->address          = $labincharge->address;
@@ -310,6 +357,7 @@ class Users extends Front_Controller
             break;
             case 'student':
                 $student = $this->students_model->find_by('user_id',$user->id);
+                $user->id_number        = $student->id_number;
                 $user->firstname        = $student->firstname;
                 $user->lastname         = $student->lastname;
                 $user->address          = $student->address;
@@ -317,12 +365,14 @@ class Users extends Front_Controller
             break;
             case 'teacher':
                 $teacher = $this->teachers_model->find_by('user_id',$user->id);
+                $user->id_number        = $teacher->id_number;
                 $user->firstname        = $teacher->firstname;
                 $user->lastname         = $teacher->lastname;
                 $user->address          = $teacher->address;
                 $user->contact_details  = $teacher->contact_details;
             break;
             default:
+                $user->id_number        = '';
                 $user->firstname        = '';
                 $user->lastname         = '';
                 $user->address          = '';

@@ -329,23 +329,24 @@ class Home extends CI_Controller
             $count  = count($items) / 5;
             if($count < 2) {
                 $body .= '<div class="pbox-row">';
-                for($x=0;$x<count($items);$x++) {
-                    if($items[$x]->photo == '')
-                        $path = Template::theme_url('images/default.png');
-                    else
-                        $path = '/userfiles/item-'.$items[$x]->id.'/photos/'.$items[$x]->photo;
+                for($x=0;$x<5;$x++) {
+                    if(isset($items[$x]) && !empty($items[$x])) {
+                        if($items[$x]->photo == '')
+                            $path = Template::theme_url('images/default.png');
+                        else
+                            $path = '/userfiles/item-'.$items[$x]->id.'/photos/'.$items[$x]->photo;
 
-                    if(isset($user->role_id) && $user->role_id != 1) {
-                        $button = '<a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
+                        if(isset($user->role_id) && $user->role_id != 1) {
+                            $button = '<a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
                                         <i class="icon-shopping-cart icon-white"></i> Add to cart
                                     </a>';
-                    }
-                    else {
-                        $button = '';
-                    }
+                        }
+                        else {
+                            $button = '';
+                        }
 
 
-                    $body .= '<div class="pbox">
+                        $body .= '<div class="pbox">
                                     <div>
                                         <img src="'.$path.'" class="img-polaroid">
                                     </div>
@@ -357,7 +358,43 @@ class Home extends CI_Controller
                                         '.$button.'
                                     </div>
                                 </div>';
+                    }
                 }
+                $body .= '</div>';
+
+                $body .= '<div class="pbox-row">';
+                for($x=5;$x<10;$x++) {
+                    if(isset($items[$x]) && !empty($items[$x])) {
+                        if($items[$x]->photo == '')
+                            $path = Template::theme_url('images/default.png');
+                        else
+                            $path = '/userfiles/item-'.$items[$x]->id.'/photos/'.$items[$x]->photo;
+
+                        if(isset($user->role_id) && $user->role_id != 1) {
+                            $button = '<a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
+                                        <i class="icon-shopping-cart icon-white"></i> Add to cart
+                                    </a>';
+                        }
+                        else {
+                            $button = '';
+                        }
+
+
+                        $body .= '<div class="pbox">
+                                    <div>
+                                        <img src="'.$path.'" class="img-polaroid">
+                                    </div>
+                                    <div class="item-name" thisid="'.$items[$x]->id.'">'.$items[$x]->name.'</div>
+                                    <div>
+                                        <span>Quantity:</span> <span class="actual-quantity">'.$items[$x]->quantity.'</span>
+                                    </div>
+                                    <div>
+                                        '.$button.'
+                                    </div>
+                                </div>';
+                    }
+                }
+
                 $body .= '</div>';
             }
             else if($count == 2) {
