@@ -8,7 +8,22 @@ $has_records	= isset($records) && is_array($records) && count($records);
 ?>
 <div class="admin-box">
 	<h3>Returned Items</h3>
-	<?php echo form_open($this->uri->uri_string()); ?>
+    <?php echo form_open($this->uri->uri_string()); ?>
+    <ul class="nav nav-pills status">
+        <li <?php if($status == '' || $status == 'all') echo 'class="active"'; ?>>
+            <a href="javascript:void(0);" class="status" status="all">All</a>
+        </li>
+        <li <?php if($status == 'lacking') echo 'class="active"'; ?>>
+            <a href="javascript:void(0);" class="status" status="lacking">Lacking</a>
+        </li>
+        <li <?php if($status == 'for approval') echo 'class="active"'; ?>>
+            <a href="javascript:void(0);" class="status" status="for approval">For Approval</a>
+        </li>
+        <li <?php if($status == 'returned') echo 'class="active"'; ?>>
+            <a href="javascript:void(0);" class="status" status="returned">Returned</a>
+        </li>
+        <input id="the-status" name="the-status" type="hidden" value="">
+    </ul>
 		<table class="table table-striped">
 			<thead>
 				<tr>

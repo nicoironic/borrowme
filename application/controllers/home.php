@@ -199,13 +199,13 @@ class Home extends CI_Controller
             $quantity = $quantity + $item->return_qty;
             if($quantity >= $item->quantity) {
                 $quantity   = $item->quantity;
-                $status     = 'returned';
+                $status     = 'for approval';
             }
         }
         else {
             if($quantity >= $item->quantity) {
                 $quantity   = $item->quantity;
-                $status     = 'returned';
+                $status     = 'for approval';
             }
         }
 
@@ -216,12 +216,13 @@ class Home extends CI_Controller
         $this->db->where('id', $itemid);
         $this->db->update('bf_returned_items', $data);
 
-        $realitem   = $this->items_model->find($item->item_id);
-        $data = array(
-            'quantity'      => ($realitem->quantity + $quantity)
-        );
-        $this->db->where('id', $realitem->id);
-        $this->db->update('bf_items', $data);
+        //Add up qty to the item itself
+//        $realitem   = $this->items_model->find($item->item_id);
+//        $data = array(
+//            'quantity'      => ($realitem->quantity + $quantity)
+//        );
+//        $this->db->where('id', $realitem->id);
+//        $this->db->update('bf_items', $data);
 
         $result = array(
             'quantity'  => $quantity,
@@ -253,6 +254,9 @@ class Home extends CI_Controller
             case 'lacking':
                 $items = $this->returned_items_model->find_all_by('status','lacking');
             break;
+            case 'for approval':
+                $items = $this->returned_items_model->find_all_by('status','for approval');
+                break;
             case 'returned':
                 $items = $this->returned_items_model->find_all_by('status','returned');
             break;
@@ -265,7 +269,7 @@ class Home extends CI_Controller
             foreach($items as $row) {
                 $disabled = '';
                 $item = $this->items_model->find($row->item_id);
-                if($row->status == 'returned') {
+                if($row->status == 'for approval' || $row->status == 'returned') {
                     $disabled = 'disabled';
                 }
                 $body .= '<tr>

@@ -48,10 +48,10 @@ class Users extends Front_Controller
         $this->load->model('students/students_model', null, true);
         $this->load->model('teachers/teachers_model', null, true);
         $this->load->model('lab_incharge/lab_incharge_model', null, true);
-
 		$this->load->library('users/auth');
-
 		$this->lang->load('users');
+
+        Assets::add_css(array(Template::theme_url('css/always.css')));
 
 	}//end __construct()
 

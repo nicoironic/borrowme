@@ -20,6 +20,9 @@ class logs extends Admin_Controller
 
 		$this->auth->restrict('Returned_Items.Logs.View');
 		$this->load->model('returned_items_model', null, true);
+        $this->load->model('items/items_model', null, true);
+        $this->load->model('students/students_model', null, true);
+        $this->load->model('lab_incharge/lab_incharge_model', null, true);
 		$this->lang->load('returned_items');
 		
 		Template::set_block('sub_nav', 'logs/_sub_nav');
@@ -62,9 +65,44 @@ class logs extends Admin_Controller
 			}
 		}
 
-		$records = $this->returned_items_model->find_all();
+        if (isset($_POST['the-status'])) {
+            switch($_POST['the-status']) {
+                case 'lacking':
+                    $items = $this->returned_items_model->find_all_by('status','lacking');
+                    break;
+                case 'for approval':
+                    $items = $this->returned_items_model->find_all_by('status','for approval');
+                    break;
+                case 'returned':
+                    $items = $this->returned_items_model->find_all_by('status','returned');
+                    break;
+                case 'all':
+                    $items = $this->returned_items_model->find_all();
+                    break;
+            }
+        }
+        else {
+            $items = $this->returned_items_model->find_all();
+        }
 
-		Template::set('records', $records);
+        if(!empty($items)) {
+            foreach($items as $row) {
+                $item                   = $this->items_model->find($row->item_id);
+                if(!empty($item))
+                    $row->item_id       = $item->name;
+
+                $labincharge            = $this->lab_incharge_model->find($row->worker_id);
+                if(!empty($labincharge))
+                    $row->worker_id     = $labincharge->firstname.' '.$labincharge->lastname;
+
+                $student                = $this->students_model->find($row->student_id);
+                if(!empty($student))
+                    $row->student_id    = $student->firstname.' '.$student->lastname;
+            }
+        }
+
+        Template::set('status',$_POST['the-status']);
+		Template::set('records', $items);
 		Template::set('toolbar_title', 'Manage Returned Items');
 		Template::render();
 	}
@@ -98,7 +136,11 @@ class logs extends Admin_Controller
 		}
 		Assets::add_module_js('returned_items', 'returned_items.js');
 
+        Template::set('items', $this->get_items());
+        Template::set('students', $this->get_students());
+        Template::set('labincharge', $this->get_labincharge());
 		Template::set('toolbar_title', lang('returned_items_create') . ' Returned Items');
+        Template::set_view('logs/edit');
 		Template::render();
 	}
 
@@ -154,6 +196,10 @@ class logs extends Admin_Controller
 				Template::set_message(lang('returned_items_delete_failure') . $this->returned_items_model->error, 'error');
 			}
 		}
+
+        Template::set('items', $this->get_items());
+        Template::set('students', $this->get_students());
+        Template::set('labincharge', $this->get_labincharge());
 		Template::set('returned_items', $this->returned_items_model->find($id));
 		Template::set('toolbar_title', lang('returned_items_edit') .' Returned Items');
 		Template::render();
@@ -183,10 +229,14 @@ class logs extends Admin_Controller
 		// make sure we only pass in the fields we want
 		
 		$data = array();
-		$data['worker_id']        = $this->input->post('returned_items_worker_id');
-		$data['student_id']        = $this->input->post('returned_items_student_id');
+		$data['worker_id']      = $this->input->post('returned_items_worker_id');
+		$data['student_id']     = $this->input->post('returned_items_student_id');
 		$data['item_id']        = $this->input->post('returned_items_item_id');
-		$data['quantity']        = $this->input->post('returned_items_quantity');
+		$data['quantity']       = $this->input->post('returned_items_quantity');
+
+        $status = $this->input->post('returned_items_status');
+        if($status != '')
+            $data['status']         = $this->input->post('returned_items_status');
 
 		if ($type == 'insert')
 		{
@@ -203,6 +253,22 @@ class logs extends Admin_Controller
 		}
 		elseif ($type == 'update')
 		{
+            if(isset($data['status']) && $data['status'] == 'returned') {
+                $item_qty   = 0;
+                $retu_qty   = 0;
+                $total   = 0;
+                $item       = $this->items_model->find($data['item_id']);
+                $return     = $this->returned_items_model->find($id);
+
+                $item_qty   = $item->quantity;
+                $retu_qty   = $return->return_qty;
+                $total      = $item_qty + $retu_qty;
+
+                $array      = array('quantity' => $total);
+                $this->db->where('id', $data['item_id']);
+                $this->db->update('bf_items', $array);
+            }
+
 			$return = $this->returned_items_model->update($id, $data);
 		}
 
@@ -211,5 +277,33 @@ class logs extends Admin_Controller
 
 	//--------------------------------------------------------------------
 
+    /**
+     * Get list of lab incharge
+     *
+     * @return array
+     */
+    private function get_items()
+    {
+        return $this->items_model->find_all();
+    }
 
+    /**
+     * Get list of lab incharge
+     *
+     * @return array
+     */
+    private function get_students()
+    {
+        return $this->students_model->find_all();
+    }
+
+    /**
+     * Get list of lab incharge
+     *
+     * @return array
+     */
+    private function get_labincharge()
+    {
+        return $this->lab_incharge_model->find_all();
+    }
 }

@@ -25,27 +25,33 @@ $id = isset($returned_items['id']) ? $returned_items['id'] : '';
 		<fieldset>
 
 			<?php // Change the values in this array to populate your dropdown as required
-				$options = array(
-					11 => 11,
-				);
-
-				echo form_dropdown('returned_items_worker_id', $options, set_value('returned_items_worker_id', isset($returned_items['worker_id']) ? $returned_items['worker_id'] : ''), 'Lab Incharge'. lang('bf_form_label_required'));
+				$options = array(0 => 'Select Lab-Incharge');
+                if(!empty($labincharge)) {
+                    foreach($labincharge as $row) {
+                        $options[$row->worker_id] = $row->firstname.' '.$row->lastname;
+                    }
+                }
+				echo form_dropdown('returned_items_worker_id', $options, set_value('returned_items_worker_id', isset($returned_items['worker_id']) ? $returned_items['worker_id'] : ''), 'Lab Incharge');
 			?>
 
 			<?php // Change the values in this array to populate your dropdown as required
-				$options = array(
-					11 => 11,
-				);
-
-				echo form_dropdown('returned_items_student_id', $options, set_value('returned_items_student_id', isset($returned_items['student_id']) ? $returned_items['student_id'] : ''), 'Student'. lang('bf_form_label_required'));
+                $options = array(0 => 'Select Student');
+                if(!empty($students)) {
+                    foreach($students as $row) {
+                        $options[$row->student_id] = $row->firstname.' '.$row->lastname;
+                    }
+                }
+				echo form_dropdown('returned_items_student_id', $options, set_value('returned_items_student_id', isset($returned_items['student_id']) ? $returned_items['student_id'] : ''), 'Student');
 			?>
 
 			<?php // Change the values in this array to populate your dropdown as required
-				$options = array(
-					11 => 11,
-				);
-
-				echo form_dropdown('returned_items_item_id', $options, set_value('returned_items_item_id', isset($returned_items['item_id']) ? $returned_items['item_id'] : ''), 'Item'. lang('bf_form_label_required'));
+                $options = array(0 => 'Select Item');
+                if(!empty($items)) {
+                    foreach($items as $row) {
+                        $options[$row->id] = $row->name;
+                    }
+                }
+				echo form_dropdown('returned_items_item_id', $options, set_value('returned_items_item_id', isset($returned_items['item_id']) ? $returned_items['item_id'] : ''), 'Item');
 			?>
 
 			<div class="control-group <?php echo form_error('quantity') ? 'error' : ''; ?>">
@@ -55,6 +61,15 @@ $id = isset($returned_items['id']) ? $returned_items['id'] : '';
 					<span class='help-inline'><?php echo form_error('quantity'); ?></span>
 				</div>
 			</div>
+
+
+            <?php
+            if(isset($returned_items['status']) && $returned_items['status'] == 'for approval') {
+                // Change the values in this array to populate your dropdown as required
+                $options = array('for approval' => 'For Approval','returned' => 'Returned');
+                echo form_dropdown('returned_items_status', $options, set_value('returned_items_status', isset($returned_items['status']) ? $returned_items['status'] : ''), 'Status');
+            }
+            ?>
 
 			<div class="form-actions">
 				<input type="submit" name="save" class="btn btn-primary" value="<?php echo lang('returned_items_action_edit'); ?>"  />

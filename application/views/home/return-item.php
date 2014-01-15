@@ -5,12 +5,15 @@
         Always return your borrowed items after <b>use</b>.
     </div>
 
-    <ul class="nav nav-pills">
+    <ul class="nav nav-pills status">
         <li class="active">
             <a href="javascript:void(0);" class="status" status="all">All</a>
         </li>
         <li>
             <a href="javascript:void(0);" class="status" status="lacking">Lacking</a>
+        </li>
+        <li>
+            <a href="javascript:void(0);" class="status" status="for approval">For Approval</a>
         </li>
         <li>
             <a href="javascript:void(0);" class="status" status="returned">Returned</a>
