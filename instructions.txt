@@ -1,0 +1,47 @@
+Okay guys, mao ni ang changes done:
+
+ADMIN: should not have the add cart but can still view the items
+
+STUDENT: registration form, if sayop ang format sa email nga gi encode dapat mu red ang box unya if naay required field nga wala na fill out dapat naay promt
+
+ADMIN: makaview sa students nga ni borrow ug ang items nga gi borrow as well as ang quantity, borrowed date, due date. incase ni due na dapat naa nay charge
+
+ADMIN/STUDENT: kinahanglan na ug due date ang mu borrow ug nga makita both sa admin ug sa student pero ang admin mao  ang maka.butang sa due date
+
+
+------------------------------------------------------------------------------------------------------------------
+
+Then mao ni ang flow sa borrowing and returning of items
+
+BORROW ITEM
+1. Student or Lab-Incharge borrows an item from the list
+2. After checking-out the items, the system will provide you a 'code' and show it to your Admin
+TAKE NOTE:
+- Use this same code if you want to return an item/s
+3. The Admin log-ins and goes to the backend to search for your record using the 'code' at:
+http://borrowme.local/admin/logs/returned_items
+4. If the Admin inputs a due_date and charge then saves it, the borrowed qty will then be deducted to the inventory
+
+RETURN ITEM
+1. Student or Lab-Incharge goes to this page: http://borrowme.local/return-item
+2. He or She will notice the first record on the list has a due_date and overdue_charge, so that means he's request is confirmed by the admin.
+3. So if he wants to return item, he just inputs the quantity to return.
+TAKE NOTE: 
+- If return-qty is not equals to borrow-qty then the status will still be 'lacking'
+- If return-qty is equals to borrow-qty then the status will be 'for approval'
+4. Use same code for the admin to confirm your returned item
+5. The Admin log-ins and goes to the backend to search for your record using the 'code' at:
+http://borrowme.local/admin/logs/returned_items
+6. If the Admin changes your status from 'for approval' to 'returned', then the returned qty will be added back to inventory
+
+
+------------------------------------------------------------------------------------------------------------------
+
+LOGIN DETAILS:
+admin username: admin@irscl.com
+admin password: password
+
+student username: nica@gmail.com
+student password: Password123
+
+or you can create your own
