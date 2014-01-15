@@ -55,12 +55,30 @@ $id = isset($returned_items['id']) ? $returned_items['id'] : '';
 			?>
 
 			<div class="control-group <?php echo form_error('quantity') ? 'error' : ''; ?>">
-				<?php echo form_label('Quantity'. lang('bf_form_label_required'), 'returned_items_quantity', array('class' => 'control-label') ); ?>
+				<?php echo form_label('Quantity', 'returned_items_quantity', array('class' => 'control-label') ); ?>
 				<div class='controls'>
 					<input id='returned_items_quantity' type='text' name='returned_items_quantity' maxlength="255" value="<?php echo set_value('returned_items_quantity', isset($returned_items['quantity']) ? $returned_items['quantity'] : ''); ?>" />
 					<span class='help-inline'><?php echo form_error('quantity'); ?></span>
 				</div>
 			</div>
+
+
+            <div class="control-group <?php echo form_error('due_date') ? 'error' : ''; ?>">
+                <?php echo form_label('Due Date', 'returned_items_due_date', array('class' => 'control-label') ); ?>
+                <div class='controls'>
+                    <input id='returned_items_due_date' type='text' name='returned_items_due_date' maxlength="255" value="<?php echo set_value('returned_items_due_date', isset($returned_items['due_date']) ? $returned_items['due_date'] : ''); ?>" />
+                    <span class='help-inline'><?php echo form_error('due_date'); ?></span>
+                </div>
+            </div>
+
+
+            <div class="control-group <?php echo form_error('overdue_charge') ? 'error' : ''; ?>">
+                <?php echo form_label('Overdue Charge', 'returned_items_overdue_charge', array('class' => 'control-label') ); ?>
+                <div class='controls'>
+                    <input id='returned_items_overdue_charge' type='text' name='returned_items_overdue_charge' maxlength="255" value="<?php echo set_value('returned_items_overdue_charge', isset($returned_items['overdue_charge']) ? $returned_items['overdue_charge'] : ''); ?>" />
+                    <span class='help-inline'><?php echo form_error('overdue_charge'); ?></span>
+                </div>
+            </div>
 
 
             <?php

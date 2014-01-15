@@ -4,4 +4,10 @@ $( document ).ready(function() {
 
         $(this).parents('form').submit();
     });
+    $('button#search-code-btn').click(function() {
+        $(this).parents('form').submit();
+    });
+    $('input#returned_items_due_date').datepicker({
+        dateFormat: 'yy-mm-dd'
+    });
 });

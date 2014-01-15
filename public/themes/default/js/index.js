@@ -125,8 +125,8 @@ function other_events() {
                 error       : function(result) {
                 },
                 success     : function(result,status,xhr) {
-                    if(result == 'success') {
-                        alert('Successful!');
+                    if(result.result == 'success') {
+                        alert('Show this confirmation code to your Admin:'+result.code);
                         window.location.replace(current_url());
                     }
                     else {

@@ -38,7 +38,7 @@ p.already-registered {
                 <!-- End of User Meta -->
             <?php
             // Change the values in this array to populate your dropdown as required
-            $options = array('student' => 'Student','labincharge' => 'Lab Incharge');
+            $options = array('student' => 'Student','labincharge' => 'Lab Incharge','teacher' => 'Teacher');
             echo form_dropdown('role_desc', $options, set_value('role_desc', isset($returned_items['role_desc']) ? $returned_items['role_desc'] : ''), 'Role');
             ?>
                 <div class="control-group">

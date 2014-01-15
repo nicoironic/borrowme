@@ -65,6 +65,7 @@ class logs extends Admin_Controller
 			}
 		}
 
+        $this->returned_items_model->order_by('created_on', 'desc');
         if (isset($_POST['the-status'])) {
             switch($_POST['the-status']) {
                 case 'lacking':
@@ -85,6 +86,10 @@ class logs extends Admin_Controller
             $items = $this->returned_items_model->find_all();
         }
 
+        if(isset($_POST['search-code']) && $_POST['search-code'] != '') {
+            $items = $this->returned_items_model->find_all_by('confirmation_code',$_POST['search-code']);
+        }
+
         if(!empty($items)) {
             foreach($items as $row) {
                 $item                   = $this->items_model->find($row->item_id);
@@ -101,7 +106,8 @@ class logs extends Admin_Controller
             }
         }
 
-        Template::set('status',$_POST['the-status']);
+        $status = isset($_POST['the-status']) ? $_POST['the-status'] : '';
+        Template::set('status',$status);
 		Template::set('records', $items);
 		Template::set('toolbar_title', 'Manage Returned Items');
 		Template::render();
@@ -229,10 +235,12 @@ class logs extends Admin_Controller
 		// make sure we only pass in the fields we want
 		
 		$data = array();
-		$data['worker_id']      = $this->input->post('returned_items_worker_id');
-		$data['student_id']     = $this->input->post('returned_items_student_id');
-		$data['item_id']        = $this->input->post('returned_items_item_id');
-		$data['quantity']       = $this->input->post('returned_items_quantity');
+		$data['worker_id']          = $this->input->post('returned_items_worker_id');
+		$data['student_id']         = $this->input->post('returned_items_student_id');
+		$data['item_id']            = $this->input->post('returned_items_item_id');
+		$data['quantity']           = $this->input->post('returned_items_quantity');
+        $data['due_date']           = $this->input->post('returned_items_due_date');
+        $data['overdue_charge']     = $this->input->post('returned_items_overdue_charge');
 
         $status = $this->input->post('returned_items_status');
         if($status != '')
@@ -253,10 +261,27 @@ class logs extends Admin_Controller
 		}
 		elseif ($type == 'update')
 		{
+            $item_qty   = 0;
+            $retu_qty   = 0;
+            $total   = 0;
+            $status = isset($data['status']) ? $data['status'] : '';
+
+            if(isset($data['due_date']) && $data['due_date'] != '' && $data['due_date'] != '0000-00-00') {
+                if($status == '' || $status != 'returned') {
+                    $item       = $this->items_model->find($data['item_id']);
+                    $return     = $this->returned_items_model->find($id);
+
+                    $item_qty   = $item->quantity;
+                    $retu_qty   = $return->quantity;
+                    $total      = $item_qty - $retu_qty;
+
+                    $array      = array('quantity' => $total);
+                    $this->db->where('id', $data['item_id']);
+                    $this->db->update('bf_items', $array);
+                }
+            }
+
             if(isset($data['status']) && $data['status'] == 'returned') {
-                $item_qty   = 0;
-                $retu_qty   = 0;
-                $total   = 0;
                 $item       = $this->items_model->find($data['item_id']);
                 $return     = $this->returned_items_model->find($id);
 

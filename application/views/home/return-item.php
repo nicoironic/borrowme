@@ -33,6 +33,8 @@
                         <th>Current Qty</th>
                         <th>Borrowed Qty</th>
                         <th>Returned Qty</th>
+                        <th>Due Date</th>
+                        <th>Overdue Charge</th>
                         <th>Status</th>
                         <th>&nbsp;</th>
                     </tr>

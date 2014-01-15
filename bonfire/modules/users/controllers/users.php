@@ -492,6 +492,7 @@ class Users extends Front_Controller
 			$this->form_validation->set_rules('timezones', 'lang:bf_timezone', 'trim|max_length[4]');
 			$this->form_validation->set_rules('display_name', 'lang:bf_display_name', 'trim|max_length[255]');
 
+            $this->form_validation->set_rules('idnumber', 'ID Number', 'required');
             $this->form_validation->set_rules('firstname', 'Firstname', 'required');
             $this->form_validation->set_rules('lastname', 'Lastname', 'required');
 
@@ -549,6 +550,7 @@ class Users extends Front_Controller
                     switch($role_desc) {
                         case 'labincharge':
                             $data = array(
+                                'id_number'         => $this->input->post('idnumber'),
                                 'firstname'         => $this->input->post('firstname'),
                                 'lastname'          => $this->input->post('lastname'),
                                 'address'           => $this->input->post('address'),
@@ -559,6 +561,7 @@ class Users extends Front_Controller
                             break;
                         case 'student':
                             $data = array(
+                                'id_number'         => $this->input->post('idnumber'),
                                 'firstname'         => $this->input->post('firstname'),
                                 'lastname'          => $this->input->post('lastname'),
                                 'address'           => $this->input->post('address'),
@@ -566,6 +569,17 @@ class Users extends Front_Controller
                                 'user_id'           => $user_id
                             );
                             $this->db->insert('bf_students', $data);
+                            break;
+                        case 'teacher':
+                            $data = array(
+                                'id_number'         => $this->input->post('idnumber'),
+                                'firstname'         => $this->input->post('firstname'),
+                                'lastname'          => $this->input->post('lastname'),
+                                'address'           => $this->input->post('address'),
+                                'contact_details'   => $this->input->post('contact_details'),
+                                'user_id'           => $user_id
+                            );
+                            $this->db->insert('bf_teachers', $data);
                             break;
                     }
 

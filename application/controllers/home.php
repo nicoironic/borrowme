@@ -250,6 +250,7 @@ class Home extends CI_Controller
             $this->returned_items_model->where('student_id',$student->student_id);
         }
 
+        $this->returned_items_model->order_by('created_on', 'desc');
         switch($type) {
             case 'lacking':
                 $items = $this->returned_items_model->find_all_by('status','lacking');
@@ -278,6 +279,8 @@ class Home extends CI_Controller
                         <td class="align-right">'.$item->quantity.'</td>
                         <td class="align-right">'.$row->quantity.'<input type="hidden" class="borrow-qty" value="'.$row->quantity.'"></td>
                         <td class="align-right"><span class="span-return-qty">'.$row->return_qty.'</span><input type="hidden" class="return-qty" value="'.$row->return_qty.'"></td>
+                        <td>'.$row->due_date.'</td>
+                        <td>'.$row->overdue_charge.'</td>
                         <td><span class="span-status">'.$row->status.'</span></td>
                         <td class="align-right">
                             <div class="input-append input-prepend">
@@ -296,6 +299,8 @@ class Home extends CI_Controller
                         <td class="align-right">&nbsp;</td>
                         <td class="align-right">&nbsp;</td>
                         <td class="align-right">&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
                         <td>&nbsp;</td>
                         <td class="align-right">&nbsp;</td>
                     </tr>';
@@ -330,7 +335,7 @@ class Home extends CI_Controller
                     else
                         $path = '/userfiles/item-'.$items[$x]->id.'/photos/'.$items[$x]->photo;
 
-                    if(($user->role_id) != 1) {
+                    if(isset($user->role_id) && $user->role_id != 1) {
                         $button = '<a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
                                         <i class="icon-shopping-cart icon-white"></i> Add to cart
                                     </a>';
@@ -365,7 +370,7 @@ class Home extends CI_Controller
                         else
                             $path = '/userfiles/item-'.$items[$y+$num]->id.'/photos/'.$items[$y+$num]->photo;
 
-                        if(isset($user->role_id) != 1) {
+                        if(isset($user->role_id) && $user->role_id != 1) {
                             $button = '<a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$y+$num]->id.'">
                                             <i class="icon-shopping-cart icon-white"></i> Add to cart
                                         </a>';
@@ -454,6 +459,7 @@ class Home extends CI_Controller
     }
 
     public function items_checkout_ajax() {
+        $confirm_code = substr(md5(uniqid(rand(), true)), 16, 16);
         $this->load->model('lab_incharge/lab_incharge_model', null, true);
         $this->load->model('students/students_model', null, true);
 
@@ -474,43 +480,35 @@ class Home extends CI_Controller
 
             if($is_worker) {
                 $data = array(
-                    'quantity'  => $item->quantity - $items[$x]['qty'],
-                    'modified_on'   => date('Y-m-d H:i:s')
-                );
-                $this->db->where('id', $items[$x]['id']);
-                $this->db->update('bf_items', $data);
-
-                $data = array(
-                    'worker_id' => $worker->worker_id,
-                    'item_id'   => $items[$x]['id'],
-                    'quantity'  => $items[$x]['qty'],
-                    'status'     => 'lacking',
-                    'created_on'    => date('Y-m-d H:i:s'),
-                    'modified_on'   => date('Y-m-d H:i:s')
+                    'worker_id'         => $worker->worker_id,
+                    'item_id'           => $items[$x]['id'],
+                    'quantity'          => $items[$x]['qty'],
+                    'status'            => 'lacking',
+                    'confirmation_code' => $confirm_code,
+                    'created_on'        => date('Y-m-d H:i:s'),
+                    'modified_on'       => date('Y-m-d H:i:s')
                 );
                 $this->db->insert('bf_returned_items', $data);
             }
             else if($is_student) {
                 $data = array(
-                    'quantity'  => $item->quantity - $items[$x]['qty'],
-                    'modified_on'   => date('Y-m-d H:i:s')
-                );
-                $this->db->where('id', $items[$x]['id']);
-                $this->db->update('bf_items', $data);
-
-                $data = array(
-                    'student_id'    => $student->student_id,
-                    'item_id'       => $items[$x]['id'],
-                    'quantity'      => $items[$x]['qty'],
-                    'status'         => 'lacking',
-                    'created_on'    => date('Y-m-d H:i:s'),
-                    'modified_on'   => date('Y-m-d H:i:s')
+                    'student_id'        => $student->student_id,
+                    'item_id'           => $items[$x]['id'],
+                    'quantity'          => $items[$x]['qty'],
+                    'status'            => 'lacking',
+                    'confirmation_code' => $confirm_code,
+                    'created_on'        => date('Y-m-d H:i:s'),
+                    'modified_on'       => date('Y-m-d H:i:s')
                 );
                 $this->db->insert('bf_returned_items', $data);
             }
         }
 
-        die(json_encode('success'));
+        $array = array(
+            'code'      => $confirm_code,
+            'result'    => 'success'
+        );
+        die(json_encode($array));
     }
 
 	/**

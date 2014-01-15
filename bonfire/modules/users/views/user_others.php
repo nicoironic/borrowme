@@ -1,3 +1,11 @@
+<div class="control-group<?php echo iif(form_error('idnumber'), $errorClass); ?>">
+    <label class="control-label bold" for="idnumber">ID Number</label>
+    <div class="controls">
+        <input class="<?php echo $controlClass; ?>" type="text" id="idnumber" name="idnumber" value="<?php echo set_value('idnumber', isset($user) ? $user->id_number : ''); ?>" />
+        <span class="help-inline"><?php echo form_error('idnumber'); ?></span>
+    </div>
+</div>
+
 <div class="control-group<?php echo iif(form_error('firstname'), $errorClass); ?>">
     <label class="control-label bold" for="firstname">First Name</label>
     <div class="controls">

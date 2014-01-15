@@ -9,7 +9,7 @@ $has_records	= isset($records) && is_array($records) && count($records);
 <div class="admin-box">
 	<h3>Returned Items</h3>
     <?php echo form_open($this->uri->uri_string()); ?>
-    <ul class="nav nav-pills status">
+    <ul class="nav nav-pills status" style="float:left;">
         <li <?php if($status == '' || $status == 'all') echo 'class="active"'; ?>>
             <a href="javascript:void(0);" class="status" status="all">All</a>
         </li>
@@ -24,6 +24,11 @@ $has_records	= isset($records) && is_array($records) && count($records);
         </li>
         <input id="the-status" name="the-status" type="hidden" value="">
     </ul>
+
+    <div class="input-append" style="float:right;">
+        <input class="span10" id="search-code" type="text" placeholder="Confirmation Code" name="search-code">
+        <button class="btn" type="button" style="height:28px;" id="search-code-btn">Go!</button>
+    </div>
 		<table class="table table-striped">
 			<thead>
 				<tr>
@@ -35,8 +40,9 @@ $has_records	= isset($records) && is_array($records) && count($records);
 					<th>Student</th>
 					<th>Item</th>
 					<th>Quantity</th>
-					<th><?php echo lang("returned_items_column_created"); ?></th>
-					<th><?php echo lang("returned_items_column_modified"); ?></th>
+					<th>Return Quantity</th>
+					<th>Due Date</th>
+                    <th>Overdue Charge</th>
 				</tr>
 			</thead>
 			<?php if ($has_records) : ?>
@@ -69,8 +75,9 @@ $has_records	= isset($records) && is_array($records) && count($records);
 					<td><?php e($record->student_id) ?></td>
 					<td><?php e($record->item_id) ?></td>
 					<td><?php e($record->quantity) ?></td>
-					<td><?php e($record->created_on) ?></td>
-					<td><?php e($record->modified_on) ?></td>
+					<td><?php e($record->return_qty) ?></td>
+					<td><?php e($record->due_date) ?></td>
+                    <td><?php e($record->overdue_charge) ?></td>
 				</tr>
 				<?php
 					endforeach;
