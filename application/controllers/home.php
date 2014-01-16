@@ -656,11 +656,13 @@ class Home extends CI_Controller
 
             $transactions = $this->returned_items_model->find_all();
 
-            foreach($transactions as $row) {
-                $time = strtotime($row->created_on);
-                $row->date_string = date("F d, Y",$time);
+            if(!empty($transactions)) {
+                foreach($transactions as $row) {
+                    $time = strtotime($row->created_on);
+                    $row->date_string = date("F d, Y",$time);
+                }
             }
-
+            
             Assets::add_css(array(Template::theme_url('css/transactions.css')));
             Assets::add_js(Template::theme_url('js/transactions.js'), 'external', true);
             $this->set_current_user();

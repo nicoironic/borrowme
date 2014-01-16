@@ -14,14 +14,17 @@
             </thead>
             <tbody>
             <?php
-            foreach($transactions as $row) {
-            ?>
-                <tr>
-                    <td><a href="javascript:void(0);" class="date-link" value="<?php echo $row->created_on?>" thisstatus="<?php echo $row->status; ?>"><?php echo $row->date_string; ?></a></td>
-                    <td><?php echo $row->status; ?></td>
-                    <td><?php echo $row->confirmation_code; ?></td>
-                </tr>
-            <?php } ?>
+            if(!empty($transactions)) {
+                foreach($transactions as $row) {
+                ?>
+                    <tr>
+                        <td><a href="javascript:void(0);" class="date-link" value="<?php echo $row->created_on?>" thisstatus="<?php echo $row->status; ?>"><?php echo $row->date_string; ?></a></td>
+                        <td><?php echo $row->status; ?></td>
+                        <td><?php echo $row->confirmation_code; ?></td>
+                    </tr>
+                <?php
+                }
+            } ?>
             </tbody>
         </table>
         <?php echo $pages; ?>
