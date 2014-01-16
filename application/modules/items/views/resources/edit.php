@@ -56,6 +56,22 @@ $id = isset($items['id']) ? $items['id'] : '';
 				</div>
 			</div>
 
+            <div class="control-group <?php echo form_error('penalty') ? 'error' : ''; ?>">
+                <?php echo form_label('Penalty', 'items_penalty', array('class' => 'control-label') ); ?>
+                <div class='controls'>
+                    <input id='items_penalty' type='text' name='items_penalty' maxlength="255" value="<?php echo set_value('items_penalty', isset($items['penalty']) ? $items['penalty'] : ''); ?>" />
+                    <span class='help-inline'><?php echo form_error('penalty'); ?></span>
+                </div>
+            </div>
+
+            <div class="control-group <?php echo form_error('damage_charge') ? 'error' : ''; ?>">
+                <?php echo form_label('Damage Charge', 'items_damage_charge', array('class' => 'control-label') ); ?>
+                <div class='controls'>
+                    <input id='items_damage_charge' type='text' name='items_damage_charge' maxlength="255" value="<?php echo set_value('items_damage_charge', isset($items['damage_charge']) ? $items['damage_charge'] : ''); ?>" />
+                    <span class='help-inline'><?php echo form_error('damage_charge'); ?></span>
+                </div>
+            </div>
+
 			<?php // Change the values in this array to populate your dropdown as required
 				$options = array(
 					'Active' => 'Active',

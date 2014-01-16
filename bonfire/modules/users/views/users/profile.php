@@ -25,6 +25,7 @@ $fieldData = array(
         <h4 class="alert-heading"><?php echo lang('bf_required_note'); ?></h4>
         <?php if (isset($password_hints)) { echo $password_hints; } ?>
     </div>
+    <button type="button" class="btn btn-success" id="enable-edit">Click me to Edit Fields</button>
     <div class="row-fluid">
     	<div class="span12">
             <?php echo form_open($this->uri->uri_string(), array('class' => 'form-horizontal', 'autocomplete' => 'off')); ?>

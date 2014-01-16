@@ -1,0 +1,10 @@
+div.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+td.text-left {
+    text-align: left !important;
+}
+td.text-right {
+    text-align: right !important;
+}

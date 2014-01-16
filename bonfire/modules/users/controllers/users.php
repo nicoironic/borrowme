@@ -234,6 +234,8 @@ class Users extends Front_Controller
 	 */
 	public function profile()
 	{
+        Assets::add_js(Template::theme_url('js/profile.js'), 'external', true);
+
 		// Make sure we're logged in.
 		$this->auth->restrict();
 		$this->set_current_user();
@@ -505,6 +507,9 @@ class Users extends Front_Controller
 	 */
 	public function register()
 	{
+        Assets::add_js(Template::theme_url('js/register.js'), 'external', true);
+
+
 		// Are users even allowed to register?
 		if (!$this->settings_lib->item('auth.allow_register'))
 		{
@@ -605,9 +610,19 @@ class Users extends Front_Controller
                                 'lastname'          => $this->input->post('lastname'),
                                 'address'           => $this->input->post('address'),
                                 'contact_details'   => $this->input->post('contact_details'),
-                                'user_id'           => $user_id
+                                'user_id'           => $user_id,
+                                'status'            => 'Inactive'
                             );
                             $this->db->insert('bf_lab_incharge', $data);
+
+                            $data = array(
+                                'description'   => 'New Lab-Incharge has registered to the system',
+                                'page'          => site_url().'admin/users/lab_incharge/edit/'.$this->db->insert_id(),
+                                'seen'          => 'No',
+                                'created_on'        => date('Y-m-d H:i:s'),
+                                'modified_on'       => date('Y-m-d H:i:s')
+                            );
+                            $this->db->insert('bf_notifications', $data);
                             break;
                         case 'student':
                             $data = array(
@@ -616,9 +631,19 @@ class Users extends Front_Controller
                                 'lastname'          => $this->input->post('lastname'),
                                 'address'           => $this->input->post('address'),
                                 'contact_details'   => $this->input->post('contact_details'),
-                                'user_id'           => $user_id
+                                'user_id'           => $user_id,
+                                'status'            => 'Inactive'
                             );
                             $this->db->insert('bf_students', $data);
+
+                            $data = array(
+                                'description'   => 'New Student has registered to the system',
+                                'page'          => site_url().'admin/users/student/edit/'.$this->db->insert_id(),
+                                'seen'          => 'No',
+                                'created_on'        => date('Y-m-d H:i:s'),
+                                'modified_on'       => date('Y-m-d H:i:s')
+                            );
+                            $this->db->insert('bf_notifications', $data);
                             break;
                         case 'teacher':
                             $data = array(
@@ -627,9 +652,19 @@ class Users extends Front_Controller
                                 'lastname'          => $this->input->post('lastname'),
                                 'address'           => $this->input->post('address'),
                                 'contact_details'   => $this->input->post('contact_details'),
-                                'user_id'           => $user_id
+                                'user_id'           => $user_id,
+                                'status'            => 'Inactive'
                             );
                             $this->db->insert('bf_teachers', $data);
+
+                            $data = array(
+                                'description'   => 'New Teacher has registered to the system',
+                                'page'          => site_url().'admin/users/teacher/edit/'.$this->db->insert_id(),
+                                'seen'          => 'No',
+                                'created_on'        => date('Y-m-d H:i:s'),
+                                'modified_on'       => date('Y-m-d H:i:s')
+                            );
+                            $this->db->insert('bf_notifications', $data);
                             break;
                     }
 
@@ -640,7 +675,7 @@ class Users extends Front_Controller
 					// Prepare user messaging vars
 					$subject = '';
 					$email_mess = '';
-					$message = lang('us_email_thank_you');
+					$message = "Thank you for registering! Your account is still INACTIVE due to Admin's approval";
 					$type = 'success';
 					$site_title = $this->settings_lib->item('site.title');
 					$error = false;

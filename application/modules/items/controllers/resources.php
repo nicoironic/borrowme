@@ -237,11 +237,13 @@ class resources extends Admin_Controller
 		// make sure we only pass in the fields we want
 		
 		$data = array();
-		$data['name']        = $this->input->post('items_name');
+		$data['name']               = $this->input->post('items_name');
 		$data['description']        = $this->input->post('items_description');
-		$data['specifications']        = $this->input->post('items_specifications');
-		$data['quantity']        = $this->input->post('items_quantity');
-		$data['status']        = $this->input->post('items_status');
+		$data['specifications']     = $this->input->post('items_specifications');
+		$data['quantity']           = $this->input->post('items_quantity');
+        $data['penalty']            = $this->input->post('items_penalty');
+        $data['damage_charge']      = $this->input->post('items_damage_charge');
+		$data['status']             = $this->input->post('items_status');
 
 		if ($type == 'insert')
 		{

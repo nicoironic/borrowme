@@ -9,6 +9,8 @@ var user_id = 0;
 var role_id = 0;
 
 $( document ).ready(function() {
+    $('.bxslider').bxSlider();
+
     user_id = $('input#user_id').val();
     role_id = $('input#role_id').val();
 
@@ -68,11 +70,11 @@ function item_events() {
             var parent  = $(this).parents('div.pbox');
             var itemid  = $(parent).find('div.item-name').attr('thisid');
             var item    = $(parent).find('div.item-name').text();
-            var qty     = $(parent).find('span.actual-quantity').text();
+            var qty     = $(parent).find('span.actual-quantity').attr('actual-qty');
 
             var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1" readonly/></div></div>';
 
-            if(qty > 0) {
+            if(parseInt(qty) > 0) {
                 var result  = check_commons(itemid);
 
                 if(!result) {
@@ -195,10 +197,10 @@ function decrease_this_item(element) {
     var parent  = $(element).parents('div.pbox');
     var qty     = parseInt($(parent).find('span.actual-quantity').text());
 
-    if(qty > 0) {
-        qty = qty - 1;
-        $(parent).find('span.actual-quantity').text(qty);
-    }
+//    if(qty > 0) {
+//        qty = qty - 1;
+//        $(parent).find('span.actual-quantity').text(qty);
+//    }
 }
 
 function current_url() {
