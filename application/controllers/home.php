@@ -662,7 +662,7 @@ class Home extends CI_Controller
                     $row->date_string = date("F d, Y",$time);
                 }
             }
-            
+
             Assets::add_css(array(Template::theme_url('css/transactions.css')));
             Assets::add_js(Template::theme_url('js/transactions.js'), 'external', true);
             $this->set_current_user();
