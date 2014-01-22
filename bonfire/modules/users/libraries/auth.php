@@ -139,11 +139,6 @@ class Auth
 			return FALSE;
 		}
 
-		$this->ci->load->model('users/User_model', 'user_model');
-        $this->ci->load->model('students/Students_model', 'students_model');
-        $this->ci->load->model('lab_incharge/Lab_incharge_model', 'lab_incharge_model');
-        $this->ci->load->model('teachers/Teachers_model', 'teachers_model');
-
 
 		// Grab the user from the db
 		$selects = 'id, email, username, users.role_id, users.deleted, users.active, banned, ban_message, password_hash, password_iterations, force_password_reset';
@@ -185,12 +180,10 @@ class Auth
 			return FALSE;
 		}
 
-//        $worker     = $this->lab_incharge_model->find_by('user_id',$user->id);
-//        if(!empty($worker))
-//            $is_worker = true;
-//        $student    = $this->students_model->find_by('user_id',$user->id);
-//        if(!empty($student))
-//            $is_student = true;
+        if($user->active == 0) {
+            Template::set_message('Your account is still INACTIVE. Please contact the Admin', 'error');
+            return FALSE;
+        }
 
 		// check if the account has been soft deleted.
 		if ($user->deleted >= 1) // in case we go to a unix timestamp later, this will still work.

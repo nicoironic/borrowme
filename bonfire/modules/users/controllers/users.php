@@ -52,6 +52,7 @@ class Users extends Front_Controller
 		$this->lang->load('users');
 
         Assets::add_css(array(Template::theme_url('css/always.css')));
+        Assets::add_js(Template::theme_url('js/always.js'), 'external', true);
 
 	}//end __construct()
 
@@ -593,7 +594,7 @@ class Users extends Front_Controller
 				if ($activation_method == 0)
 				{
 					// Activate the user automatically
-					$data['active'] = 1;
+					$data['active'] = 0;
 				}
 
 				if ($user_id = $this->user_model->insert($data))
@@ -638,7 +639,7 @@ class Users extends Front_Controller
 
                             $data = array(
                                 'description'   => 'New Student has registered to the system',
-                                'page'          => site_url().'admin/users/student/edit/'.$this->db->insert_id(),
+                                'page'          => site_url().'admin/users/students/edit/'.$this->db->insert_id(),
                                 'seen'          => 'No',
                                 'created_on'        => date('Y-m-d H:i:s'),
                                 'modified_on'       => date('Y-m-d H:i:s')
@@ -659,7 +660,7 @@ class Users extends Front_Controller
 
                             $data = array(
                                 'description'   => 'New Teacher has registered to the system',
-                                'page'          => site_url().'admin/users/teacher/edit/'.$this->db->insert_id(),
+                                'page'          => site_url().'admin/users/teachers/edit/'.$this->db->insert_id(),
                                 'seen'          => 'No',
                                 'created_on'        => date('Y-m-d H:i:s'),
                                 'modified_on'       => date('Y-m-d H:i:s')
@@ -686,7 +687,6 @@ class Users extends Front_Controller
 							// No activation required. Activate the user and send confirmation email
 							$subject 		=  str_replace('[SITE_TITLE]',$this->settings_lib->item('site.title'),lang('us_account_reg_complete'));
 							$email_mess 	= $this->load->view('_emails/activated', array('title'=>$site_title,'link' => site_url()), true);
-							$message 		.= lang('us_account_active_login');
 							break;
 						case 1:
 							// Email Activiation.

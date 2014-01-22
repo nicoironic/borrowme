@@ -44,7 +44,8 @@ $route['404_override'] = '';
 // Items
 $route['add-item']              = 'home/add_item';
 $route['return-item']           = 'home/return_item';
-$route['transactions']           = 'home/transactions';
+$route['transactions']          = 'home/transactions';
+$route['notifications']         = 'home/notifications';
 
 // Authentication
 $route[LOGIN_URL]				= 'users/login';

@@ -46,11 +46,13 @@ class Home extends CI_Controller
         $this->lang->load('application');
         $this->load->model('items/items_model', null, true);
         $this->load->model('returned_items/returned_items_model', null, true);
+        $this->load->model('notifications/notifications_model', null, true);
 
         Assets::add_css(array(Template::theme_url('css/jqueryui.bootstrap.css')));
         Assets::add_css(array(Template::theme_url('css/always.css')));
         Assets::add_js('codeigniter-csrf.js');
         Assets::add_js(Template::theme_url('js/jquery-ui-1.8.13.min.js'), 'external', true);
+        Assets::add_js(Template::theme_url('js/always.js'), 'external', true);
 	}
 
 	//--------------------------------------------------------------------
@@ -1465,6 +1467,32 @@ class Home extends CI_Controller
         $body = $pagination;
 
         return $body;
+    }
+
+    public function notifications() {
+        $this->set_current_user();
+
+        $this->notifications_model->update_where('seen', 'No', array('seen' => 'Yes'));
+
+        $this->notifications_model->limit(20);
+        $this->notifications_model->order_by('created_on', 'desc');
+        $rows = $this->notifications_model->find_all();
+
+        Template::set('rows',$rows);
+        Template::set_view('home/notifications');
+        Template::render();
+    }
+
+    public function get_notifications() {
+        $this->set_current_user();
+
+        if(empty($this->current_user))
+            return false;
+
+        $rows = $this->notifications_model->count_by('seen','No');
+
+        $array = array('count' => $rows);
+        die(json_encode($array));
     }
 
 	//--------------------------------------------------------------------
