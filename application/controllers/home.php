@@ -1495,5 +1495,54 @@ class Home extends CI_Controller
         die(json_encode($array));
     }
 
+    public function reports() {
+        $rows = '';
+        $this->set_current_user();
+        $mode = $this->input->post('mode');
+        if($mode == 'daily') {
+            $rows = $this->db->query("SELECT i.`name` AS 'name',
+                                SUM(i.`quantity`) AS 'quantity',
+                                SUM(r.`quantity`) AS 'borrowed_quantity',
+                                SUM(r.`return_qty`) AS 'returned_quantity'
+                                FROM bf_returned_items r
+                                INNER JOIN bf_items i ON i.id = r.`item_id`
+                                WHERE r.created_on >= CURDATE()
+                                AND r.created_on <= CURDATE()
+                                GROUP BY r.`item_id`
+                                ORDER BY borrowed_quantity DESC");
+        }
+        else if($mode == 'weekly') {
+            $rows = $this->db->query("SELECT i.`name` AS 'name',
+                                SUM(i.`quantity`) AS 'quantity',
+                                SUM(r.`quantity`) AS 'borrowed_quantity',
+                                SUM(r.`return_qty`) AS 'returned_quantity'
+                                FROM bf_returned_items r
+                                INNER JOIN bf_items i ON i.id = r.`item_id`
+                                WHERE r.created_on >= ADDDATE(CURDATE(), INTERVAL 1-DAYOFWEEK(CURDATE()) DAY)
+                                AND r.created_on <= ADDDATE(CURDATE(), INTERVAL 7-DAYOFWEEK(CURDATE()) DAY)
+                                GROUP BY r.`item_id`
+                                ORDER BY borrowed_quantity DESC");
+        }
+        else if($mode == 'monthly') {
+            $rows = $this->db->query("SELECT i.`name` AS 'name',
+                                SUM(i.`quantity`) AS 'quantity',
+                                SUM(r.`quantity`) AS 'borrowed_quantity',
+                                SUM(r.`return_qty`) AS 'returned_quantity'
+                                FROM bf_returned_items r
+                                INNER JOIN bf_items i ON i.id = r.`item_id`
+                                WHERE r.created_on >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+                                AND r.created_on <= LAST_DAY(CURDATE())
+                                GROUP BY r.`item_id`
+                                ORDER BY borrowed_quantity DESC");
+        }
+
+
+        Assets::add_js(Template::theme_url('js/reports.js'), 'external', true);
+        Template::set('rows',$rows);
+        Template::set('mode',$mode);
+        Template::set_view('home/reports');
+        Template::render();
+    }
+
 	//--------------------------------------------------------------------
 }//end class

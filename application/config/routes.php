@@ -46,6 +46,7 @@ $route['add-item']              = 'home/add_item';
 $route['return-item']           = 'home/return_item';
 $route['transactions']          = 'home/transactions';
 $route['notifications']         = 'home/notifications';
+$route['reports']               = 'home/reports';
 
 // Authentication
 $route[LOGIN_URL]				= 'users/login';
