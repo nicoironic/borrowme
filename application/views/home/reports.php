@@ -8,10 +8,10 @@
             <li <?php if($mode == '' || $mode == 'daily') echo 'class="active"'; ?>>
                 <a href="javascript:void(0);" class="status" mode="daily">Daily</a>
             </li>
-            <li <?php if($mode == '' || $mode == 'weekly') echo 'class="active"'; ?>>
+            <li <?php if($mode == 'weekly') echo 'class="active"'; ?>>
                 <a href="javascript:void(0);" class="status" mode="weekly">Weekly</a>
             </li>
-            <li <?php if($mode == '' || $mode == 'monthly') echo 'class="active"'; ?>>
+            <li <?php if($mode == 'monthly') echo 'class="active"'; ?>>
                 <a href="javascript:void(0);" class="status" mode="monthly">Monthly</a>
             </li>
         </ul>
@@ -29,14 +29,16 @@
             </tr>
             </thead>
             <tbody id="dynamic-tbody">
-            <?php foreach($rows->result() as $row) { ?>
+            <?php
+            if(!empty($rows)):
+            foreach($rows->result() as $row) { ?>
             <tr>
                 <td><?php echo $row->name; ?></td>
                 <td><?php echo $row->quantity; ?></td>
                 <td><?php echo $row->borrowed_quantity; ?></td>
                 <td><?php echo $row->returned_quantity; ?></td>
             </tr>
-            <?php } ?>
+            <?php } endif; ?>
             </tbody>
         </table>
     </div>
