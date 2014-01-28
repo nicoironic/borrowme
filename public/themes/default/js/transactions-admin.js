@@ -236,6 +236,33 @@ function button_events() {
 
             items.push(values);
         });
+        $('table.table-borrowed input.return-qty').each(function() {
+            var penalty     = $(this).parents('tr').find('span.penalty').text();
+            var itemid      = $(this).attr('thisid');
+            var quantity    = $(this).val();
+            var status      = $(this).parents('tr').find('select.item-status').val();
+            var charge      = $(this).parents('tr').find('span.item-damage-charge').text();
+
+            if(!isNumber(quantity)) {
+                alert('Enter only a numeric value');
+                okay = false;
+            }
+
+            if(parseInt(quantity) > parseInt($(this).parent().prev().text())) {
+                alert('Expected Return Qty: (0 - '+$(this).parent().prev().text()+')');
+                okay = false;
+            }
+
+            var values = {
+                id          : itemid,
+                qty         : quantity,
+                penalty     : penalty,
+                itemstatus  : status,
+                charge      : charge
+            };
+
+            items.push(values);
+        });
 
         if(okay === true) {
             $.ajax({
@@ -270,6 +297,17 @@ function button_events() {
                 total = total + parseFloat($(this).text());
             });
             $(this).parents('table').find('span.total-item-damage-charge').text(total);
+        }
+    });
+
+    $('input.check-item').unbind('click').click(function() {
+        var tr = $(this).parent().parent();
+
+        if(this.checked) {
+            $(tr).find('input#return-qty').val($(tr).find('span.item-quantity').text());
+        }
+        else {
+            $(tr).find('input#return-qty').val(0);
         }
     });
 }

@@ -17,9 +17,6 @@
                 <a href="javascript:void(0);" class="status" status="borrowed">Borrowed</a>
             </li>
             <li>
-                <a href="javascript:void(0);" class="status" status="lacking">Lacking</a>
-            </li>
-            <li>
                 <a href="javascript:void(0);" class="status" status="returned">Returned</a>
             </li>
         </ul>

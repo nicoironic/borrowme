@@ -1092,11 +1092,11 @@ class Home extends CI_Controller
                 $body .= '<h3>Details</h3><table class="table table-bordered table-borrowed">
                             <thead>
                             <tr>
+                                <th>&nbsp;</th>
                                 <th>Item</th>
                                 <th>Item Status</th>
                                 <th>Damage Charge</th>
                                 <th>Quantity</th>
-                                <th>Returned Qty</th>
                                 <th>Date Borrowed</th>
                                 <th>Due Date</th>
                                 <th>Charge</th>
@@ -1105,25 +1105,27 @@ class Home extends CI_Controller
                             <tbody>';
 
                 foreach($items as $row) {
-                    $item = $this->items_model->find($row->item_id);
-                    $datetime1 = strtotime($row->due_date);
-                    $datetime2 = strtotime(date('Y-m-d'));
+                    if($row->status == 'borrowed') {
+                        $item = $this->items_model->find($row->item_id);
+                        $datetime1 = strtotime($row->due_date);
+                        $datetime2 = strtotime(date('Y-m-d'));
 
-                    $secs = $datetime2 - $datetime1;
-                    $days = $secs / 86400;
-                    $sum  = $item->penalty * $days;
-                    $sum  = $sum < 0 ? 0 : $sum;
-                    $body .= '<tr>
+                        $secs = $datetime2 - $datetime1;
+                        $days = $secs / 86400;
+                        $sum  = $item->penalty * $days;
+                        $sum  = $sum < 0 ? 0 : $sum;
+                        $body .= '<tr>
+                                    <td><input type="checkbox" class="check-item"></td>
                                     <td>'.$item->name.'</td>
                                     <td><select class="item-status" thisitemvalue="'.$row->item_id.'" thisitemcharge="'.$item->damage_charge.'"><option value="ok">OK</option><option value="broken">Broken</option></select></td>
                                     <td class="text-right"><span class="item-damage-charge"></span></td>
-                                    <td class="text-right">'.$row->quantity.'</td>
-                                    <td class="text-right"><input class="span2 return-qty" id="return-qty" type="text" value="0" thisid="'.$row->id.'"></td>
+                                    <td class="text-right"><span class="item-quantity">'.$row->quantity.'</span><input class="span2 return-qty" id="return-qty" type="hidden" value="0" thisid="'.$row->id.'"></td>
                                     <td>'.$row->date_borrowed.'</td>
                                     <td>'.$row->due_date.'</td>
                                     <td class="text-right"><span class="penalty" id="penalty-'.$row->id.'">'.$sum.'</span></td>
                                 </tr>';
-                    $total = $total + $sum;
+                        $total = $total + $sum;
+                    }
                 }
                 $body .= '<tr>
                             <td><strong>TOTAL</strong></td>
@@ -1132,7 +1134,6 @@ class Home extends CI_Controller
                           </tr>
                           <tr>
                             <td colspan="8" class="text-right">
-                                <button type="button" class="btn btn-warning btn-lacking" thisstatus='.$status.' thisdate='.$date.' thiscode='.$code.'>Lacking</button>
                                 <button type="button" class="btn btn-success btn-returned" thisstatus='.$status.' thisdate='.$date.' thiscode='.$code.'>Return</button>
                             </td>
                           </tr>
@@ -1207,9 +1208,10 @@ class Home extends CI_Controller
                             <tbody>';
 
                 foreach($items as $row) {
-                    $item = $this->items_model->find($row->item_id);
-                    $name = isset($item->name) ? $item->name : '';
-                    $body .= '<tr>
+                    if($row->status == 'returned') {
+                        $item = $this->items_model->find($row->item_id);
+                        $name = isset($item->name) ? $item->name : '';
+                        $body .= '<tr>
                                 <td>'.$name.'</td>
                                 <td class="text-right">'.$row->quantity.'</td>
                                 <td>'.$row->item_status.'</td>
@@ -1218,8 +1220,9 @@ class Home extends CI_Controller
                                 <td>'.$row->due_date.'</td>
                                 <td class="text-right">'.$row->overdue_charge.'</td>
                             </tr>';
-                    $total1 = $total1 + $row->damage_charge;
-                    $total2 = $total2 + $row->overdue_charge;
+                        $total1 = $total1 + $row->damage_charge;
+                        $total2 = $total2 + $row->overdue_charge;
+                    }
                 };
 
 
@@ -1274,46 +1277,21 @@ class Home extends CI_Controller
                 }
             break;
             case 'borrowed':
-                $realstatus = $this->input->post('realstatus');
-
-                if($realstatus == 'lacking') {
-                    $data = array(
-                        'status' => 'lacking'
-                    );
-                    $this->db->where('confirmation_code', $code);
-                    $this->db->update('bf_returned_items', $data);
-
-                    $items = $this->input->post('items');
-                    for($x=0; $x<count($items); $x++) {
+                $items = $this->input->post('items');
+                for($x=0; $x<count($items); $x++) {
+                    $ret  = $this->returned_items_model->find($items[$x]['id']);
+                    if($ret->quantity == $items[$x]['qty']) {
                         $data = array(
                             'overdue_charge'    => $items[$x]['penalty'],
                             'return_qty'        => $items[$x]['qty'],
                             'item_status'       => $items[$x]['itemstatus'],
                             'damage_charge'     => trim($items[$x]['charge']) == '' ? 0 : $items[$x]['charge'],
-                        );
-                        $this->db->where('id', $items[$x]['id']);
-                        $this->db->update('bf_returned_items', $data);
-                    }
-                }
-                else if($realstatus == 'returned') {
-                    $data = array(
-                        'status' => 'returned'
-                    );
-                    $this->db->where('confirmation_code', $code);
-                    $this->db->update('bf_returned_items', $data);
-
-                    $items = $this->input->post('items');
-                    for($x=0; $x<count($items); $x++) {
-                        $data = array(
-                            'overdue_charge'    => $items[$x]['penalty'],
-                            'return_qty'        => $items[$x]['qty'],
-                            'item_status'       => $items[$x]['itemstatus'],
-                            'damage_charge'     => trim($items[$x]['charge']) == '' ? 0 : $items[$x]['charge'],
+                            'status'            => 'returned'
                         );
                         $this->db->where('id', $items[$x]['id']);
                         $this->db->update('bf_returned_items', $data);
 
-                        $ret  = $this->returned_item_model->find($items[$x]['id']);
+
                         $item = $this->items_model->find($ret->item_id);
                         $data = array(
                             'quantity'  => $item->quantity + $items[$x]['qty']
