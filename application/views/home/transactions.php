@@ -9,7 +9,6 @@
             <tr>
                 <th>Date</th>
                 <th>Status</th>
-                <th>Confirmation Number</th>
             </tr>
             </thead>
             <tbody>
@@ -20,7 +19,6 @@
                     <tr>
                         <td><a href="javascript:void(0);" class="date-link" value="<?php echo $row->created_on?>" thisstatus="<?php echo $row->status; ?>"><?php echo $row->date_string; ?></a></td>
                         <td><?php echo $row->status; ?></td>
-                        <td><?php echo $row->confirmation_code; ?></td>
                     </tr>
                 <?php
                 }
@@ -32,12 +30,15 @@
         <?php form_close(); ?>
     </div>
 
-    <div class="transactions-details">
-        <h3 class="page-header" style="text-align: left;">Transaction Details <span class="specific-date" style="color:green;">&nbsp;</span></h3>
-        <div class="details-body">
-
+    <div id="detailsModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="detailsModalLabel">Transaction Details <span class="specific-date" style="color:green;">&nbsp;</span></h3>
+        </div>
+        <div class="modal-body">
         </div>
     </div>
+
     <?php
     $user_id = 0;
     $role_id = 0;

@@ -128,7 +128,7 @@ function other_events() {
                 },
                 success     : function(result,status,xhr) {
                     if(result.result == 'success') {
-                        alert('Show this confirmation code to your Admin:'+result.code);
+                        alert('Checkout Successful');
                         window.location.replace(current_url());
                     }
                     else {

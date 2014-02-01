@@ -29,8 +29,11 @@ function events() {
                 "status"        : $(this).attr('thisstatus')
             },
             success: function(result,status,xhr) {
-                $('div.details-body').html(result);
-                $('span.specific-date').text('('+date+')');
+                $('div#detailsModal div.modal-body').html('');
+                $('div#detailsModal div.modal-body').html(result);
+                $('div#detailsModal span.specific-date').text('('+date+')');
+
+                $('div#detailsModal').modal('toggle');
             },
             complete: function() {
             }

@@ -47,7 +47,7 @@ function events() {
 
     $('table#transactions-table a.date-link').unbind('toggle').toggle(
         function() {
-            $('table#transactions-table tr.temporary').remove();
+            $('div#detailsModal div.modal-body').html('');
 
             var tr = $(this).parents('tr');
             $.ajax({
@@ -57,11 +57,13 @@ function events() {
                     "ci_csrf_token"	: ci_csrf_token(),
                     "date"          : $(this).attr('value'),
                     "status"        : $(this).attr('thisstatus'),
-                    "code"          : $(this).attr('thiscode')
+                    "idnum"         : $(this).attr('thisidnumber')
                 },
                 success: function(result,status,xhr) {
-                    $(tr).after('<tr class="temporary"><td colspan="5">'+result+'</td></tr>');
-                    button_events();
+                    $('div#detailsModal div.modal-body').html(result);
+                    var what = button_events();
+                    $('div#detailsModal').modal('toggle');
+
                 },
                 complete: function() {
                     $('div.processing').css('visibility','hidden');
@@ -69,7 +71,7 @@ function events() {
             });
         },
         function() {
-            $('table#transactions-table tr.temporary').remove();
+            $('div#detailsModal div.modal-body').html('');
         }
     );
 
@@ -89,9 +91,9 @@ function button_events() {
             url : '/home/change_status_ajax',
             data: {
                 "ci_csrf_token"	: ci_csrf_token(),
-                "date"          : $(this).attr('value'),
+                "date"          : $(this).attr('thisdate'),
                 "status"        : $(this).attr('thisstatus'),
-                "code"          : $(this).attr('thiscode')
+                "code"          : $(this).attr('thisidnumber')
             },
             success: function(result,status,xhr) {
                 if(result == 'success') {
@@ -100,7 +102,7 @@ function button_events() {
                 }
             },
             complete: function() {
-
+                $('div#detailsModal').modal('toggle');
             }
         });
     });
@@ -121,9 +123,9 @@ function button_events() {
             url : '/home/change_status_ajax',
             data: {
                 "ci_csrf_token"	: ci_csrf_token(),
-                "date"          : $(this).attr('value'),
+                "date"          : $(this).attr('thisdate'),
                 "status"        : $(this).attr('thisstatus'),
-                "code"          : $(this).attr('thiscode'),
+                "code"          : $(this).attr('thisidnumber'),
                 "date_borrowed" : $('table.table-approved input#date-borrowed').val(),
                 "due_date"      : $('table.table-approved input#due-date').val()
             },
@@ -134,7 +136,7 @@ function button_events() {
                 }
             },
             complete: function() {
-
+                $('div#detailsModal').modal('toggle');
             }
         });
     });
@@ -181,9 +183,9 @@ function button_events() {
                 url : '/home/change_status_ajax',
                 data: {
                     "ci_csrf_token"	: ci_csrf_token(),
-                    "date"          : $(this).attr('value'),
+                    "date"          : $(this).attr('thisdate'),
                     "status"        : $(this).attr('thisstatus'),
-                    "code"          : $(this).attr('thiscode'),
+                    "code"          : $(this).attr('thisidnumber'),
                     "items"         : items,
                     "realstatus"    : 'lacking'
                 },
@@ -194,7 +196,7 @@ function button_events() {
                     }
                 },
                 complete: function() {
-
+                    $('div#detailsModal').modal('toggle');
                 }
             });
         }
@@ -270,9 +272,9 @@ function button_events() {
                 url : '/home/change_status_ajax',
                 data: {
                     "ci_csrf_token"	: ci_csrf_token(),
-                    "date"          : $(this).attr('value'),
+                    "date"          : $(this).attr('thisdate'),
                     "status"        : $(this).attr('thisstatus'),
-                    "code"          : $(this).attr('thiscode'),
+                    "code"          : $(this).attr('thisidnumber'),
                     "items"         : items
                 },
                 success: function(result,status,xhr) {
@@ -282,7 +284,7 @@ function button_events() {
                     }
                 },
                 complete: function() {
-
+                    $('div#detailsModal').modal('toggle');
                 }
             });
         }
@@ -310,6 +312,8 @@ function button_events() {
             $(tr).find('input#return-qty').val(0);
         }
     });
+
+    return true;
 }
 
 function isNumber(n) {

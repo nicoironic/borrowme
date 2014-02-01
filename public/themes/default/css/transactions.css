@@ -8,3 +8,10 @@ td.text-left {
 td.text-right {
     text-align: right !important;
 }
+div#detailsModal {
+    width: 80%;
+    left: 31%;
+}
+div#detailsModal h3 {
+    text-align: left;
+}

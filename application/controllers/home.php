@@ -543,7 +543,7 @@ class Home extends CI_Controller
                     'item_id'           => $items[$x]['id'],
                     'quantity'          => $items[$x]['qty'],
                     'status'            => 'pending',
-                    'confirmation_code' => $confirm_code,
+                    'id_number'         => $worker->id_number,
                     'created_on'        => date('Y-m-d H:i:s'),
                     'modified_on'       => date('Y-m-d H:i:s')
                 );
@@ -564,7 +564,7 @@ class Home extends CI_Controller
                     'item_id'           => $items[$x]['id'],
                     'quantity'          => $items[$x]['qty'],
                     'status'            => 'pending',
-                    'confirmation_code' => $confirm_code,
+                    'id_number'         => $student->id_number,
                     'created_on'        => date('Y-m-d H:i:s'),
                     'modified_on'       => date('Y-m-d H:i:s')
                 );
@@ -582,7 +582,7 @@ class Home extends CI_Controller
         }
 
         $array = array(
-            'code'      => $confirm_code,
+            'code'      => '',
             'result'    => 'success'
         );
         die(json_encode($array));
@@ -652,7 +652,7 @@ class Home extends CI_Controller
                 $this->db->where('student_id',$student->student_id);
             }
 
-            $this->db->group_by(array("confirmation_code"));
+            $this->db->group_by(array("id_number","created_on"));
             $this->db->order_by("created_on", "desc");
             $this->db->limit(5, $page_num);
 
@@ -699,7 +699,7 @@ class Home extends CI_Controller
                 $this->db->where('student_id',$student->student_id);
             }
 
-            $this->db->group_by(array("created_on", "status"));
+            $this->db->group_by(array("id_number","created_on"));
             $this->db->order_by("created_on", "desc");
 
             $items = $this->returned_items_model->find_all();
@@ -738,7 +738,7 @@ class Home extends CI_Controller
             $page   = 5 * $page;
 
             $this->db->limit(5, $page);
-            $this->db->group_by(array("created_on", "status"));
+            $this->db->group_by(array("id_number","created_on"));
             $this->db->order_by("created_on", "desc");
 
             $items = $this->returned_items_model->find_all();
@@ -758,7 +758,7 @@ class Home extends CI_Controller
             }
 
             $this->db->limit(5, $page + 5);
-            $this->db->group_by(array("created_on", "status"));
+            $this->db->group_by(array("id_number","created_on"));
             $this->db->order_by("created_on", "desc");
             $items = $this->returned_items_model->find_all();
             if(!empty($items) && count($items) > 0) {
@@ -930,11 +930,11 @@ class Home extends CI_Controller
         $search     = $this->input->post('search');
         $user       = $this->auth->user();
 
-        $this->db->group_by(array("confirmation_code"));
+        $this->db->group_by(array("id_number","created_on"));
         $this->db->order_by("created_on", "desc");
 
         if($search != '') {
-            $this->db->where("confirmation_code", $search);
+            $this->db->like("id_number", $search,"both");
         }
 
         $this->db->limit(10, $page * 10);
@@ -968,7 +968,6 @@ class Home extends CI_Controller
                         <th>User</th>
                         <th>Role</th>
                         <th>Status</th>
-                        <th>Confirmation Number</th>
                     </tr>
                     </thead>
                     <tbody id="dynamic-tbody">';
@@ -990,17 +989,15 @@ class Home extends CI_Controller
                 }
 
                 $body .= '<tr>
-                        <td><a href="javascript:void(0);" class="date-link" value="'.$row->created_on.'" thisstatus="'.$row->status.'" thiscode="'.$row->confirmation_code.'">'.$row->date_string.'</a></td>
+                        <td><a href="javascript:void(0);" class="date-link" value="'.$row->created_on.'" thisidnumber="'.$row->id_number.'" thisstatus="'.$row->status.'" thiscode="'.$row->confirmation_code.'">'.$row->date_string.'</a></td>
                         <td>'.$theuser.'</td>
                         <td>'.$therole.'</td>
                         <td>'.$row->status.'</td>
-                        <td>'.$row->confirmation_code.'</td>
                     </tr>';
             }
         }
         else {
             $body .= '<tr>
-                        <td>&nbsp;</td>
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>
@@ -1017,7 +1014,7 @@ class Home extends CI_Controller
 
     public function inner_table_ajax() {
         $body = '';
-        $code = $this->input->post('code');
+        $code = $this->input->post('idnum');
         $date = $this->input->post('date');
         $status = $this->input->post('status');
         $this->load->model('lab_incharge/lab_incharge_model', null, true);
@@ -1033,9 +1030,10 @@ class Home extends CI_Controller
             $this->db->where('student_id',$student->student_id);
         }
 
-        $this->returned_items_model->where('confirmation_code',$code);
+        $this->returned_items_model->where('id_number',$code);
+        $this->returned_items_model->where('created_on',$date);
+        $this->returned_items_model->where('status',$status);
         $items = $this->returned_items_model->find_all();
-
 
         switch($status) {
             case 'pending':
@@ -1055,7 +1053,7 @@ class Home extends CI_Controller
                     </tr>';
                 }
 
-                $body .= '<tr><td colspan="2" style="text-align:right;"><button type="button" class="btn btn-success btn-pending" thisstatus='.$status.' thisdate='.$date.' thiscode='.$code.'>Approve</button></td></tr></tbody></table>';
+                $body .= '<tr><td colspan="2" style="text-align:right;"><button type="button" class="btn btn-success btn-pending" thisidnumber='.$code.' thisstatus='.$status.' thisdate='.$date.'>Approve</button></td></tr></tbody></table>';
                 break;
             case 'approved':
                 $body .= '<h3>Details</h3><table class="table table-bordered table-approved">
@@ -1078,10 +1076,10 @@ class Home extends CI_Controller
                             <td colspan="2" style="text-align:right;">
                                 <div class="input-prepend">
                                   <span class="add-on"><i class="icon-calendar"></i></span>
-                                  <input class="span10 date-borrowed datepicker" id="date-borrowed" type="text" placeholder="Date Borrowed" value="">
+                                  <input class="span2 date-borrowed datepicker" id="date-borrowed" type="text" placeholder="Date Borrowed" value="">
                                 </div>
                                 <input class="span2 due-date" id="due-date" type="text" placeholder="Due Date" value="" disabled>
-                                <button type="button" class="btn btn-success btn-approved" thisstatus='.$status.' thisdate='.$date.' thiscode='.$code.'>Borrow</button>
+                                <button style="margin-bottom: 11px;" type="button" class="btn btn-success btn-approved" thisidnumber='.$code.' thisstatus='.$status.' thisdate='.$date.'>Borrow</button>
                             </td>
                           </tr>
                           </tbody>
@@ -1134,7 +1132,7 @@ class Home extends CI_Controller
                           </tr>
                           <tr>
                             <td colspan="8" class="text-right">
-                                <button type="button" class="btn btn-success btn-returned" thisstatus='.$status.' thisdate='.$date.' thiscode='.$code.'>Return</button>
+                                <button type="button" class="btn btn-success btn-returned" thisidnumber='.$code.' thisstatus='.$status.' thisdate='.$date.'>Return</button>
                             </td>
                           </tr>
                           </tbody>
@@ -1184,7 +1182,7 @@ class Home extends CI_Controller
                           </tr>
                           <tr>
                             <td colspan="8" class="text-right">
-                                <button type="button" class="btn btn-success btn-returned" thisstatus='.$status.' thisdate='.$date.' thiscode='.$code.'>Return</button>
+                                <button type="button" class="btn btn-success btn-returned" thisidnumber='.$code.' thisstatus='.$status.' thisdate='.$date.'>Return</button>
                             </td>
                           </tr>
                           </tbody>
@@ -1250,7 +1248,9 @@ class Home extends CI_Controller
                     'status' => 'approved'
                 );
 
-                $this->db->where('confirmation_code', $code);
+                $this->db->where('id_number', $code);
+                $this->db->where('created_on', $date);
+                $this->db->where('status', $status);
                 $this->db->update('bf_returned_items', $data);
             break;
             case 'approved':
@@ -1262,10 +1262,14 @@ class Home extends CI_Controller
                     'due_date'      => $due_date,
                 );
 
-                $this->db->where('confirmation_code', $code);
+                $this->db->where('id_number', $code);
+                $this->db->where('created_on', $date);
+                $this->db->where('status', $status);
                 $this->db->update('bf_returned_items', $data);
 
-                $this->returned_items_model->where('confirmation_code', $code);
+                $this->returned_items_model->where('id_number', $code);
+                $this->returned_items_model->where('created_on', $date);
+                $this->returned_items_model->where('status', 'borrowed');
                 $items = $this->returned_items_model->find_all();
                 foreach($items as $row) {
                     $item = $this->items_model->find($row->item_id);
@@ -1305,7 +1309,9 @@ class Home extends CI_Controller
                 $data = array(
                     'status' => 'returned'
                 );
-                $this->db->where('confirmation_code', $code);
+                $this->db->where('id_number', $code);
+                $this->db->where('created_on', $date);
+                $this->db->where('status', $status);
                 $this->db->update('bf_returned_items', $data);
 
                 $items = $this->input->post('items');
@@ -1334,7 +1340,7 @@ class Home extends CI_Controller
     private function make_transaction_pagination($page = 0,$status = '') {
         $pages = '';
 
-        $this->db->group_by(array("confirmation_code"));
+        $this->db->group_by(array("id_number","created_on"));
         $this->db->order_by("created_on", "desc");
 
         if($page == 0) {

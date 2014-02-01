@@ -22,7 +22,7 @@
         </ul>
 
         <div class="input-append" style="float:right;">
-            <input class="span2" id="search-code" type="text" placeholder="Confirmation Code" name="search-code">
+            <input class="span2" id="search-code" type="text" placeholder="ID Number" name="search-code">
             <button class="btn" type="button" style="height:30px;" id="search-code-btn">Go!</button>
         </div>
         <?php echo form_open($this->uri->uri_string(), 'class="form-horizontal"'); ?>
@@ -36,6 +36,15 @@
             </div>
         </div>
         <?php form_close(); ?>
+    </div>
+
+    <div id="detailsModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="detailsModalLabel">&nbsp;</h3>
+        </div>
+        <div class="modal-body">
+        </div>
     </div>
 
     <?php
