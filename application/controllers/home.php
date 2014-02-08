@@ -47,6 +47,8 @@ class Home extends CI_Controller
         $this->load->model('items/items_model', null, true);
         $this->load->model('returned_items/returned_items_model', null, true);
         $this->load->model('notifications/notifications_model', null, true);
+        $this->load->model('lab_incharge/lab_incharge_model', null, true);
+        $this->load->model('students/students_model', null, true);
 
         Assets::add_css(array(Template::theme_url('css/jqueryui.bootstrap.css')));
         Assets::add_css(array(Template::theme_url('css/always.css')));
@@ -238,6 +240,8 @@ class Home extends CI_Controller
         $this->db->update('bf_returned_items', $data);
 
         $data = array(
+            'user_id'       => $this->current_user->id,
+            'role_user'     => 'admin',
             'description'   => 'A User returned an item',
             'page'          => site_url().'admin/logs/returned_items/edit/'.$this->db->insert_id(),
             'seen'          => 'No',
@@ -550,6 +554,8 @@ class Home extends CI_Controller
                 $this->db->insert('bf_returned_items', $data);
 
                 $data = array(
+                    'user_id'       => 1,
+                    'role_user'     => 'admin',
                     'description'   => 'A Lab-Incharge borrowed an item',
                     'page'          => site_url().'admin/logs/returned_items/edit/'.$this->db->insert_id(),
                     'seen'          => 'No',
@@ -571,6 +577,8 @@ class Home extends CI_Controller
                 $this->db->insert('bf_returned_items', $data);
 
                 $data = array(
+                    'user_id'       => 1,
+                    'role_user'     => 'admin',
                     'description'   => 'Student borrowed an item',
                     'page'          => site_url().'admin/logs/returned_items/edit/'.$this->db->insert_id(),
                     'seen'          => 'No',
@@ -1097,6 +1105,7 @@ class Home extends CI_Controller
                                 <th>Quantity</th>
                                 <th>Date Borrowed</th>
                                 <th>Due Date</th>
+                                <th>Date Return</th>
                                 <th>Charge</th>
                             </tr>
                             </thead>
@@ -1104,6 +1113,9 @@ class Home extends CI_Controller
 
                 foreach($items as $row) {
                     if($row->status == 'borrowed') {
+                        $text = '';
+                        $lack = $this->db->get_where('bf_returned_items_lacking', array('returned_items_id' => $row->id));
+
                         $item = $this->items_model->find($row->item_id);
                         $datetime1 = strtotime($row->due_date);
                         $datetime2 = strtotime(date('Y-m-d'));
@@ -1112,14 +1124,38 @@ class Home extends CI_Controller
                         $days = $secs / 86400;
                         $sum  = $item->penalty * $days;
                         $sum  = $sum < 0 ? 0 : $sum;
+
+                        if ($lack->num_rows() > 0)
+                        {
+                            foreach ($lack->result() as $detail)
+                            {
+                                $text = '<td class="text-right">
+                                        <a class="lacking-details" href="javascript:void(0);" thisid="'.$detail->id.'">'.$item->name.'</a>
+                                    </td>';
+                            }
+                        }
+                        else {
+                            $text = '<td>'.$item->name.'</td>';
+                        }
+
                         $body .= '<tr>
                                     <td><input type="checkbox" class="check-item"></td>
-                                    <td>'.$item->name.'</td>
+                                    '.$text.'
                                     <td><select class="item-status" thisitemvalue="'.$row->item_id.'" thisitemcharge="'.$item->damage_charge.'"><option value="ok">OK</option><option value="broken">Broken</option></select></td>
                                     <td class="text-right"><span class="item-damage-charge"></span></td>
-                                    <td class="text-right"><span class="item-quantity">'.$row->quantity.'</span><input class="span2 return-qty" id="return-qty" type="hidden" value="0" thisid="'.$row->id.'"></td>
+                                    <td>
+                                        <input class="span1 return-qty" id="return-qty" type="text" value="'.($row->quantity - $row->return_qty).'" thisid="'.$row->id.'">
+                                        <input class="hidden-quantity" type="hidden" value="'.$row->quantity.'" thisid="'.$row->id.'">
+                                        <input class="hidden-return-qty" type="hidden" value="'.$row->return_qty.'" thisid="'.$row->id.'">
+                                    </td>
                                     <td>'.$row->date_borrowed.'</td>
                                     <td>'.$row->due_date.'</td>
+                                    <td>
+                                        <div class="input-prepend">
+                                            <span class="add-on"><i class="icon-calendar"></i></span>
+                                            <input class="span1 date-return" id="date-return" type="text" placeholder="Date Return" value="'.date('Y-m-d').'">
+                                        </div>
+                                    </td>
                                     <td class="text-right"><span class="penalty" id="penalty-'.$row->id.'">'.$sum.'</span></td>
                                 </tr>';
                         $total = $total + $sum;
@@ -1128,10 +1164,10 @@ class Home extends CI_Controller
                 $body .= '<tr>
                             <td><strong>TOTAL</strong></td>
                             <td colspan="2" class="text-right"><span class="total-item-damage-charge">&nbsp;</span></td>
-                            <td colspan="5" class="text-right"><strong>'.$total.'</strong></td>
+                            <td colspan="6" class="text-right"><strong>'.$total.'</strong></td>
                           </tr>
                           <tr>
-                            <td colspan="8" class="text-right">
+                            <td colspan="9" class="text-right">
                                 <button type="button" class="btn btn-success btn-returned" thisidnumber='.$code.' thisstatus='.$status.' thisdate='.$date.'>Return</button>
                             </td>
                           </tr>
@@ -1164,6 +1200,7 @@ class Home extends CI_Controller
                     $days = $secs / 86400;
                     $sum  = $item->penalty * $days;
                     $sum  = $sum < 0 ? 0 : $sum;
+
                     $body .= '<tr>
                                     <td>'.$item->name.'</td>
                                     <td class="text-right">'.$row->quantity.'</td>
@@ -1254,48 +1291,125 @@ class Home extends CI_Controller
                 $this->db->update('bf_returned_items', $data);
             break;
             case 'approved':
-                $date_borrowed  = $this->input->post('date_borrowed');
-                $due_date       = $this->input->post('due_date');
-                $data = array(
-                    'status'        => 'borrowed',
-                    'date_borrowed' => $date_borrowed,
-                    'due_date'      => $due_date,
-                );
-
-                $this->db->where('id_number', $code);
-                $this->db->where('created_on', $date);
-                $this->db->where('status', $status);
-                $this->db->update('bf_returned_items', $data);
+                $message    = '';
+                $continue   = true;
 
                 $this->returned_items_model->where('id_number', $code);
                 $this->returned_items_model->where('created_on', $date);
-                $this->returned_items_model->where('status', 'borrowed');
+                $this->returned_items_model->where('status', $status);
                 $items = $this->returned_items_model->find_all();
                 foreach($items as $row) {
                     $item = $this->items_model->find($row->item_id);
+
+                    if($item->quantity < $row->quantity) {
+                        if($row->worker_id != null && $row->worker_id != 0) {
+                            $user_id = $row->worker_id;
+                            $role = 'labincharge';
+                        }
+                        else {
+                            $user_id = $row->student_id;
+                            $role = 'student';
+                        }
+                        $data = array(
+                            'user_id'       => $user_id,
+                            'role_user'     => $role,
+                            'description'   => 'BORROW REJECTED: '.$item->name.' quantity is short of '.abs($item->quantity - $row->quantity),
+                            'page'          => '',
+                            'details'       => '[ID:'.$row->id.'] [DATE:'.$row->created_on.']',
+                            'seen'          => 'No',
+                            'created_on'    => date('Y-m-d H:i:s'),
+                            'modified_on'   => date('Y-m-d H:i:s')
+                        );
+                        $this->db->insert('bf_notifications', $data);
+
+                        $continue = false;
+                    }
+
+                }
+
+                if($continue) {
+                    $date_borrowed  = $this->input->post('date_borrowed');
+                    $due_date       = $this->input->post('due_date');
                     $data = array(
-                        'quantity'  => $item->quantity - $row->quantity
+                        'status'        => 'borrowed',
+                        'date_borrowed' => $date_borrowed,
+                        'due_date'      => $due_date,
                     );
-                    $this->db->where('id',$row->item_id);
-                    $this->db->update('bf_items', $data);
+
+                    $this->db->where('id_number', $code);
+                    $this->db->where('created_on', $date);
+                    $this->db->where('status', $status);
+                    $this->db->update('bf_returned_items', $data);
+
+                    $this->returned_items_model->where('id_number', $code);
+                    $this->returned_items_model->where('created_on', $date);
+                    $this->returned_items_model->where('status', 'borrowed');
+                    $items = $this->returned_items_model->find_all();
+                    foreach($items as $row) {
+                        $item = $this->items_model->find($row->item_id);
+                        $data = array(
+                            'quantity'  => $item->quantity - $row->quantity
+                        );
+                        $this->db->where('id',$row->item_id);
+                        $this->db->update('bf_items', $data);
+
+                        if($row->worker_id != null && $row->worker_id != 0) {
+                            $user_id = $row->worker_id;
+                            $role = 'labincharge';
+                        }
+                        else {
+                            $user_id = $row->student_id;
+                            $role = 'student';
+                        }
+
+                        $message .= $item->name.',';
+                    }
+                    $message = 'ITEMS: '.trim($message,',').' are available for pick-up. If DONE, ignore this message.';
+
+
+                    $data = array(
+                        'user_id'       => $user_id,
+                        'role_user'     => $role,
+                        'description'   => $message,
+                        'page'          => '',
+                        'details'       => '[ID:'.$row->id.'] [DATE:'.$row->created_on.']',
+                        'seen'          => 'No',
+                        'created_on'    => date('Y-m-d H:i:s'),
+                        'modified_on'   => date('Y-m-d H:i:s')
+                    );
+                    $this->db->insert('bf_notifications', $data);
+                }
+                else {
+                    die('low quantity');
                 }
             break;
             case 'borrowed':
                 $items = $this->input->post('items');
                 for($x=0; $x<count($items); $x++) {
                     $ret  = $this->returned_items_model->find($items[$x]['id']);
-                    if($ret->quantity == $items[$x]['qty']) {
+
+                    if(($items[$x]['qty'] + $ret->return_qty) != $ret->quantity) {
+                        // LACKING QUANTITY
+
+                        // INSERT INTO returned_items_lacking table
+                        $data = array(
+                            'returned_items_id' => $items[$x]['id'],
+                            'quantity'          => $items[$x]['qty'],
+                            'date_returned'     => $items[$x]['date_return'],
+                            'created_on'        => date('Y-m-d H:i:s')
+                        );
+                        $this->db->insert('bf_returned_items_lacking', $data);
+
+                        // UPDATE the return_qty
                         $data = array(
                             'overdue_charge'    => $items[$x]['penalty'],
-                            'return_qty'        => $items[$x]['qty'],
-                            'item_status'       => $items[$x]['itemstatus'],
-                            'damage_charge'     => trim($items[$x]['charge']) == '' ? 0 : $items[$x]['charge'],
-                            'status'            => 'returned'
+                            'return_qty'        => $items[$x]['qty']
                         );
                         $this->db->where('id', $items[$x]['id']);
                         $this->db->update('bf_returned_items', $data);
 
-
+                        // ADD UP the quantity to the item's quantity
+                        $ret  = $this->returned_items_model->find($items[$x]['id']);
                         $item = $this->items_model->find($ret->item_id);
                         $data = array(
                             'quantity'  => $item->quantity + $items[$x]['qty']
@@ -1303,33 +1417,30 @@ class Home extends CI_Controller
                         $this->db->where('id',$ret->item_id);
                         $this->db->update('bf_items', $data);
                     }
-                }
-            break;
-            case 'lacking':
-                $data = array(
-                    'status' => 'returned'
-                );
-                $this->db->where('id_number', $code);
-                $this->db->where('created_on', $date);
-                $this->db->where('status', $status);
-                $this->db->update('bf_returned_items', $data);
+                    else {
+                        // FULL RETURN QUANTITY
+                        $data = array(
+                            'overdue_charge'    => $items[$x]['penalty'],
+                            'return_qty'        => $items[$x]['qty']
+                        );
+                        $this->db->where('id', $items[$x]['id']);
+                        $this->db->update('bf_returned_items', $data);
 
-                $items = $this->input->post('items');
-                for($x=0; $x<count($items); $x++) {
-                    $data = array(
-                        'overdue_charge'    => $items[$x]['penalty'],
-                        'return_qty'        => $items[$x]['qty']
-                    );
-                    $this->db->where('id', $items[$x]['id']);
-                    $this->db->update('bf_returned_items', $data);
+                        $ret  = $this->returned_items_model->find($items[$x]['id']);
+                        $item = $this->items_model->find($ret->item_id);
+                        $data = array(
+                            'quantity'  => $item->quantity + $items[$x]['qty']
+                        );
+                        $this->db->where('id',$ret->item_id);
+                        $this->db->update('bf_items', $data);
 
-                    $ret  = $this->returned_items_model->find($items[$x]['id']);
-                    $item = $this->items_model->find($ret->item_id);
-                    $data = array(
-                        'quantity'  => $item->quantity + $items[$x]['qty']
-                    );
-                    $this->db->where('id',$ret->item_id);
-                    $this->db->update('bf_items', $data);
+                        $data = array(
+                            'status' => 'returned'
+                        );
+
+                        $this->db->where('id', $items[$x]['id']);
+                        $this->db->update('bf_returned_items', $data);
+                    }
                 }
             break;
         }
@@ -1456,14 +1567,34 @@ class Home extends CI_Controller
     public function notifications() {
         $this->set_current_user();
 
-        $this->notifications_model->update_where('seen', 'No', array('seen' => 'Yes'));
+        if($this->current_user->role_desc == '') {
+            $id = $this->current_user->id;
+            $role = 'admin';
+            Template::set_view('home/notifications');
+        }
+        else {
+            $worker     = $this->lab_incharge_model->find_by('user_id',$this->current_user->id);
+            if(!empty($worker)) {
+                $id = $worker->user_id;
+                $role = 'labincharge';
+            }
+            $student    = $this->students_model->find_by('user_id',$this->current_user->id);
+            if(!empty($student)) {
+                $id = $student->user_id;
+                $role = 'student';
+            }
+            Template::set_view('home/notifications_user');
+        }
+
+        $this->notifications_model->update_where('seen', 'No', array('seen' => 'Yes','user_id' => $id, 'role_user' => $role));
 
         $this->notifications_model->limit(20);
         $this->notifications_model->order_by('created_on', 'desc');
+        $this->notifications_model->where('user_id', $id);
+        $this->notifications_model->where('role_user', $role);
         $rows = $this->notifications_model->find_all();
 
         Template::set('rows',$rows);
-        Template::set_view('home/notifications');
         Template::render();
     }
 
@@ -1473,6 +1604,25 @@ class Home extends CI_Controller
         if(empty($this->current_user))
             return false;
 
+        if($this->current_user->role_desc == '') {
+            $id = $this->current_user->id;
+            $role = 'admin';
+        }
+        else {
+            $worker     = $this->lab_incharge_model->find_by('user_id',$this->current_user->id);
+            if(!empty($worker)) {
+                $id = $worker->worker_id;
+                $role = 'labincharge';
+            }
+            $student    = $this->students_model->find_by('user_id',$this->current_user->id);
+            if(!empty($student)) {
+                $id = $student->student_id;
+                $role = 'student';
+            }
+        }
+
+        $this->notifications_model->where('user_id',$id);
+        $this->notifications_model->where('role_user',$role);
         $rows = $this->notifications_model->count_by('seen','No');
 
         $array = array('count' => $rows);
@@ -1526,6 +1676,38 @@ class Home extends CI_Controller
         Template::set('mode',$mode);
         Template::set_view('home/reports');
         Template::render();
+    }
+
+    public function lacking_details() {
+        $body   = '';
+        $id     = $this->input->post('id');
+        $lack   = $this->db->get_where('bf_returned_items_lacking', array('id' => $id));
+
+        $body .= '<tr class="sub-detail"><td>&nbsp;</td><td colspan="8">';
+
+        $body .= '<h4>Returned Quantity:</h4><table class="table table-bordered table-lacking">
+                    <thead>
+                    <tr>
+                        <th>Quantity</th>
+                        <th>Date Returned</th>
+                    </tr>
+                    </thead>
+                    <tbody>';
+
+        if ($lack->num_rows() > 0)
+        {
+            foreach ($lack->result() as $detail)
+            {
+                $body .= '<tr>
+                                <td>'.$detail->quantity.'</td>
+                                <td>'.$detail->date_returned.'</td>
+                          </tr>';
+            }
+        }
+
+        $body .= '</tbody></table></td></tr>';
+
+        die($body);
     }
 
 	//--------------------------------------------------------------------

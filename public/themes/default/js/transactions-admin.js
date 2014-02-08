@@ -101,7 +101,7 @@ function button_events() {
                     $('ul.nav-pills li a[status="approved"]').click();
                 }
             },
-            complete: function() {
+            complete: function(result) {
                 $('div#detailsModal').modal('toggle');
             }
         });
@@ -115,6 +115,10 @@ function button_events() {
             myDate.setDate(myDate.getDate()+parseInt(d));
             $('table.table-approved input#due-date').val((myDate.getFullYear())+'-'+(myDate.getMonth()+1)+'-'+(myDate.getDate()));
         }
+    });
+
+    $('input.date-return').datepicker({
+        dateFormat: 'yy-mm-dd'
     });
 
     $('button.btn-approved').unbind('click').click(function() {
@@ -133,6 +137,13 @@ function button_events() {
                 if(result == 'success') {
                     alert('Status changed to borrowed');
                     $('ul.nav-pills li a[status="borrowed"]').click();
+                }
+                else {
+                    switch(result) {
+                        case 'low quantity':
+                            alert('BORROW REJECTED: One of the items has a insufficient quantity!');
+                            break;
+                    }
                 }
             },
             complete: function() {
@@ -206,6 +217,7 @@ function button_events() {
         var items = [];
         var okay = true;
 
+
         $('table.table-lacking input.return-qty').each(function() {
             var penalty     = $(this).parents('tr').find('span.penalty').text();
             var itemid      = $(this).attr('thisid');
@@ -238,29 +250,31 @@ function button_events() {
 
             items.push(values);
         });
-        $('table.table-borrowed input.return-qty').each(function() {
-            var penalty     = $(this).parents('tr').find('span.penalty').text();
-            var itemid      = $(this).attr('thisid');
-            var quantity    = $(this).val();
-            var status      = $(this).parents('tr').find('select.item-status').val();
-            var charge      = $(this).parents('tr').find('span.item-damage-charge').text();
+        $('table.table-borrowed input.check-item:checked').each(function() {
+            var penalty         = $(this).parents('tr').find('span.penalty').text();
+            var itemid          = $(this).parents('tr').find('input#return-qty').attr('thisid');
+            var rtn_quantity    = $(this).parents('tr').find('input#return-qty').val();
+            var status          = $(this).parents('tr').find('select.item-status').val();
+            var charge          = $(this).parents('tr').find('span.item-damage-charge').text();
+            var date_return     = $(this).parents('tr').find('input#date-return').val();
 
-            if(!isNumber(quantity)) {
+            if(!isNumber(rtn_quantity)) {
                 alert('Enter only a numeric value');
                 okay = false;
             }
 
-            if(parseInt(quantity) > parseInt($(this).parent().prev().text())) {
-                alert('Expected Return Qty: (0 - '+$(this).parent().prev().text()+')');
+            if(parseInt(rtn_quantity) > parseInt($(this).parents('tr').find('input.hidden-quantity'))) {
+                alert('Expected Return Qty: (0 - '+$(this).parents('tr').find('input.hidden-quantity')+')');
                 okay = false;
             }
 
             var values = {
                 id          : itemid,
-                qty         : quantity,
+                qty         : rtn_quantity,
                 penalty     : penalty,
                 itemstatus  : status,
-                charge      : charge
+                charge      : charge,
+                date_return : date_return
             };
 
             items.push(values);
@@ -302,14 +316,28 @@ function button_events() {
         }
     });
 
-    $('input.check-item').unbind('click').click(function() {
-        var tr = $(this).parent().parent();
+    $('a.lacking-details').unbind('click').click(function() {
+        var a = $(this);
 
-        if(this.checked) {
-            $(tr).find('input#return-qty').val($(tr).find('span.item-quantity').text());
+        if($(a).parents('table').find('tr.sub-detail').length > 0) {
+            $(a).parents('table').find('tr.sub-detail').remove();
         }
         else {
-            $(tr).find('input#return-qty').val(0);
+            $.ajax({
+                type : "post",
+                url : '/home/lacking_details',
+                data: {
+                    "ci_csrf_token"	: ci_csrf_token(),
+                    "id"          : $(this).attr('thisid')
+                },
+                success: function(result) {
+                    $(a).parents('table').find('tr.sub-detail').remove();
+                    $(a).parent().parent().after(result);
+                },
+                complete: function(result) {
+
+                }
+            });
         }
     });
 

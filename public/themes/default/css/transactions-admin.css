@@ -15,3 +15,9 @@ div#detailsModal {
 div#detailsModal h3 {
     text-align: left;
 }
+select.item-status {
+    width: 130px;
+}
+input.date-return {
+    width: 100px !important;
+}

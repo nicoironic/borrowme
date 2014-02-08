@@ -6,8 +6,8 @@
         <?php else: ?>
             <?php if($current_user->role_id == 1): ?>
                 <li><a href="<?php echo site_url('/admin') ?>">Backend</a></li>
-                <li <?php echo check_class('notifications'); ?> id="notifications"><a href="<?php echo site_url('/notifications') ?>">Notifications</a></li>
             <?php endif; ?>
+            <li <?php echo check_class('notifications'); ?> id="notifications"><a href="<?php echo site_url('/notifications') ?>">Notifications</a></li>
             <li <?php echo check_class('transactions'); ?>><a href="<?php echo site_url('/transactions') ?>">Transactions</a></li>
             <li <?php echo check_class('reports'); ?>><a href="<?php echo site_url('/reports') ?>">Reports</a></li>
             <li class="dropdown"><a id="dropdown-custom" href="<?php echo site_url('/admin') ?>" class="dropdown-toggle" title="Items" data-toggle="dropdown" data-id="items_menu">Items</a></li>
