@@ -180,10 +180,12 @@ class Home extends CI_Controller
         // make sure we only pass in the fields we want
 
         $data = array();
+        $data['category']           = $this->input->post('items_category');
         $data['name']               = $this->input->post('items_name');
         $data['description']        = $this->input->post('items_description');
         $data['specifications']     = $this->input->post('items_specifications');
         $data['quantity']           = $this->input->post('items_quantity');
+        $data['price']              = $this->input->post('items_price');
         $data['status']             = $this->input->post('items_status');
 
         if ($type == 'insert')

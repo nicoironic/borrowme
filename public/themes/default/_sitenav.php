@@ -9,15 +9,17 @@
             <?php endif; ?>
             <li <?php echo check_class('notifications'); ?> id="notifications"><a href="<?php echo site_url('/notifications') ?>">Notifications</a></li>
             <li <?php echo check_class('transactions'); ?>><a href="<?php echo site_url('/transactions') ?>">Transactions</a></li>
-            <li <?php echo check_class('reports'); ?>><a href="<?php echo site_url('/reports') ?>">Reports</a></li>
-            <li class="dropdown"><a id="dropdown-custom" href="<?php echo site_url('/admin') ?>" class="dropdown-toggle" title="Items" data-toggle="dropdown" data-id="items_menu">Items</a></li>
-            <ul class="dropdown-menu dropdown-menu-custom">
-                <li><a href="<?php echo site_url('/') ?>" class="">List</a>
-                <?php if($current_user->role_desc != 'student'): ?>
+            <?php if($current_user->role_desc != 'student') { ?>
+                <li <?php echo check_class('reports'); ?>><a href="<?php echo site_url('/reports') ?>">Reports</a></li>
+                <li class="dropdown"><a id="dropdown-custom" href="<?php echo site_url('/admin') ?>" class="dropdown-toggle" title="Items" data-toggle="dropdown" data-id="items_menu">Items</a></li>
+                <ul class="dropdown-menu dropdown-menu-custom">
+                    <li><a href="<?php echo site_url('/') ?>" class="">List</a>
                     <li><a href="<?php echo site_url('/add-item') ?>" class="">Add Item</a>
-                <?php endif; ?>
-                </li>
-            </ul>
+                    </li>
+                </ul>
+            <?php } else { ?>
+                <li><a href="<?php echo site_url('/') ?>" class="">Items</a>
+            <?php } ?>
             <li <?php echo check_method('profile'); ?>><a href="<?php echo site_url('/users/profile'); ?>"> <?php echo $current_user->username; ?></a></li>
             <li><a href="<?php echo site_url('/logout') ?>"><?php e( lang('bf_action_logout')); ?></a></li>
         <?php endif; ?>

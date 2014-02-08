@@ -15,7 +15,7 @@ $has_records	= isset($records) && is_array($records) && count($records);
 					<?php if ($can_delete && $has_records) : ?>
 					<th class="column-check"><input class="check-all" type="checkbox" /></th>
 					<?php endif;?>
-					
+                    <th>Category</th>
 					<th>Name</th>
 					<th>Description</th>
 					<th>Specifications</th>
@@ -44,11 +44,11 @@ $has_records	= isset($records) && is_array($records) && count($records);
 					<?php if ($can_delete) : ?>
 					<td class="column-check"><input type="checkbox" name="checked[]" value="<?php echo $record->id; ?>" /></td>
 					<?php endif;?>
-					
+                    <td><?php e($record->category); ?></td>
 				<?php if ($can_edit) : ?>
 					<td><?php echo anchor(SITE_AREA . '/resources/items/edit/' . $record->id, '<span class="icon-pencil"></span>' .  $record->name); ?></td>
 				<?php else : ?>
-					<td><?php e($record->name); ?></td>
+                    <td><?php e($record->name); ?></td>
 				<?php endif; ?>
 					<td><?php e($record->description) ?></td>
 					<td><?php e($record->specifications) ?></td>

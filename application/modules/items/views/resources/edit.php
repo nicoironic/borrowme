@@ -24,6 +24,15 @@ $id = isset($items['id']) ? $items['id'] : '';
 	<?php echo form_open($this->uri->uri_string(), 'class="form-horizontal" enctype="multipart/form-data"'); ?>
 		<fieldset>
 
+            <?php // Change the values in this array to populate your dropdown as required
+            $options = array(
+                'apparatus' => 'Apparatus',
+                'chemical'  => 'Chemical',
+            );
+
+            echo form_dropdown('items_category', $options, set_value('items_category', isset($items['category']) ? $items['category'] : ''), 'Category'. lang('bf_form_label_required'));
+            ?>
+
 			<div class="control-group <?php echo form_error('name') ? 'error' : ''; ?>">
 				<?php echo form_label('Name'. lang('bf_form_label_required'), 'items_name', array('class' => 'control-label') ); ?>
 				<div class='controls'>
@@ -55,6 +64,14 @@ $id = isset($items['id']) ? $items['id'] : '';
 					<span class='help-inline'><?php echo form_error('quantity'); ?></span>
 				</div>
 			</div>
+
+            <div class="control-group <?php echo form_error('price') ? 'error' : ''; ?>">
+                <?php echo form_label('Price', 'items_price', array('class' => 'control-label') ); ?>
+                <div class='controls'>
+                    <input id='items_price' type='text' name='items_price' maxlength="255" value="<?php echo set_value('items_price', isset($items['price']) ? $items['price'] : ''); ?>" />
+                    <span class='help-inline'><?php echo form_error('price'); ?></span>
+                </div>
+            </div>
 
             <div class="control-group <?php echo form_error('penalty') ? 'error' : ''; ?>">
                 <?php echo form_label('Penalty', 'items_penalty', array('class' => 'control-label') ); ?>

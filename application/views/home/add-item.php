@@ -6,6 +6,15 @@
     <div class="row-fluid">
         <div class="span12">
             <?php echo form_open($this->uri->uri_string(), 'class="form-horizontal" enctype="multipart/form-data"'); ?>
+            <?php // Change the values in this array to populate your dropdown as required
+            $options = array(
+                'apparatus' => 'Apparatus',
+                'chemical'  => 'Chemical',
+            );
+
+            echo form_dropdown('items_category', $options, set_value('items_category', isset($items['category']) ? $items['category'] : ''), 'Category'. lang('bf_form_label_required'), 'class="span6"');
+            ?>
+
             <div class="control-group <?php echo form_error('name') ? 'error' : ''; ?>">
                 <?php echo form_label('Name'. lang('bf_form_label_required'), 'items_name', array('class' => 'control-label') ); ?>
                 <div class='controls'>
@@ -35,6 +44,14 @@
                 <div class='controls'>
                     <input class="span6" id='items_quantity' type='text' name='items_quantity' maxlength="255" value="<?php echo set_value('items_quantity', isset($items['quantity']) ? $items['quantity'] : ''); ?>" />
                     <span class='help-inline'><?php echo form_error('quantity'); ?></span>
+                </div>
+            </div>
+
+            <div class="control-group <?php echo form_error('price') ? 'error' : ''; ?>">
+                <?php echo form_label('Price', 'items_price', array('class' => 'control-label') ); ?>
+                <div class='controls'>
+                    <input class="span6" id='items_price' type='text' name='items_price' maxlength="255" value="<?php echo set_value('items_price', isset($items['price']) ? $items['price'] : ''); ?>" />
+                    <span class='help-inline'><?php echo form_error('price'); ?></span>
                 </div>
             </div>
 
