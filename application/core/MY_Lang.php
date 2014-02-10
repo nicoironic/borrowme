@@ -200,7 +200,7 @@ class MY_Lang extends MX_Lang {
 		{
 			log_message('error', 'lang() called with empty argument');
 
-			return 'FIXME lang() or lang(\'\')';
+			return 'INFO: lang() or lang(\'\')';
 		}
 
 		if (! isset($this->language[$line]))
@@ -208,7 +208,7 @@ class MY_Lang extends MX_Lang {
 			// Line is missing from both English and native language files
 			log_message('error', 'Could not find the language line "'.$line.'"');
 
-			return 'FIXME ("'.$line.'")';
+			return 'INFO: ("'.$line.'")';
 		}
 
 		return $this->language[$line];

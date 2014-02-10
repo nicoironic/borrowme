@@ -28,21 +28,21 @@
  * @link       http://guides.cibonfire.com/helpers/file_helpers.html
  *
  */
-class Home extends CI_Controller
+class Transactions extends CI_Controller
 {
     protected $current_user = null;
 
-	public function __construct()
-	{
-		parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
 
         $this->load->helper('form');
         $this->load->library('form_validation');
-		$this->load->helper('application');
-		$this->load->library('Template');
-		$this->load->library('Assets');
+        $this->load->helper('application');
+        $this->load->library('Template');
+        $this->load->library('Assets');
         $this->load->library('users/auth');
-		$this->load->library('events');
+        $this->load->library('events');
         $this->lang->load('application');
         //$this->lang->load('items/items_lang');
         $this->load->model('items/items_model', null, true);
@@ -56,610 +56,54 @@ class Home extends CI_Controller
         Assets::add_js('codeigniter-csrf.js');
         Assets::add_js(Template::theme_url('js/jquery-ui-1.8.13.min.js'), 'external', true);
         Assets::add_js(Template::theme_url('js/always.js'), 'external', true);
-	}
-
-	//--------------------------------------------------------------------
-
-	/**
-	 * Displays the homepage of the Bonfire app
-	 *
-	 * @return void
-	 */
-	public function index()
-	{
-		$this->load->library('installer_lib');
-        Assets::add_css(array(Template::theme_url('css/docs.css')));
-        Assets::add_css(array(Template::theme_url('css/index.css')));
-        Assets::add_js(Template::theme_url('js/index.js'), 'external', true);
-
-        Assets::add_css(array(Template::theme_url('js/jquery.bxslider/jquery.bxslider.css')));
-        Assets::add_js(Template::theme_url('js/jquery.bxslider/jquery.bxslider.js'), 'external', true);
-
-		if (!$this->installer_lib->is_installed())
-		{
-			redirect( site_url('install') );
-		}
-
-		$this->set_current_user();
-        if(!empty($this->current_user)) {
-            if($this->current_user->role_desc == '') {
-                $items = $this->items_model->find_all();
-                Template::set('items',$items);
-                Template::set_view('home/admin-index');
-            }
-            else {
-                Template::set_view('home/index');
-            }
-        }
-        else {
-            Template::set_view('home/index');
-        }
-
-		Template::render();
-	}//end index()
-
-	//--------------------------------------------------------------------
-
-
-    public function add_item() {
-        $this->auth->restrict('Items.Resources.Create');
-
-        if (isset($_POST['save']))
-        {
-            if ($insert_id = $this->save_items())
-            {
-                if ($this->input->post('file')) {
-                    if( $_FILES['file']['name'] != "" ) {
-
-                        $item_id = $insert_id;
-                        $item = $this->items_model->find($item_id);
-                        $filename = $_FILES['file']['name'];
-                        $path = '/userfiles/item-'.$item_id.'/photos';
-
-                        if($item) {
-                            $recent = $item->photo;
-                            if($recent != '') {
-                                if(file_exists(SERVERPATH.'/'.$path.'/thumbnail/'.$recent))
-                                    unlink(SERVERPATH.'/'.$path.'/thumbnail/'.$recent);
-                                if(file_exists(SERVERPATH.'/'.$path.'/'.$recent))
-                                    unlink(SERVERPATH.'/'.$path.'/'.$recent);
-                            }
-
-                            $tempFile = $_FILES['file']['tmp_name'];
-                            $targetPath = $_SERVER['DOCUMENT_ROOT'] . $path;
-                            $targetFile = rtrim($targetPath,'/') . '/' . $_FILES['file']['name'];
-
-                            $fileParts = pathinfo($_FILES['file']['name']);
-
-                            if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id)) {
-                                mkdir($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id, 0777, true);
-                            }
-                            if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id.'/photos')) {
-                                mkdir($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id.'/photos', 0777, true);
-                            }
-                            if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id.'/photos/thumbnails')) {
-                                mkdir($_SERVER['DOCUMENT_ROOT'].'/userfiles/item-'.$item_id.'/photos/thumbnails', 0777, true);
-                            }
-
-                            // Validate the file type
-                            $fileTypes = array('JPG','JPEG','GIF','PNG','TIF'); // File extensions
-
-                            if (in_array(strtoupper($fileParts['extension']),$fileTypes)) {
-                                move_uploaded_file($tempFile,$targetFile);
-                            } else {
-                                return false;
-                            }
-
-
-                        }
-                        $success = $this->items_model->update($insert_id, array('photo' => $filename));
-
-                        $result = array(
-                            'result' => $success,
-                        );
-                    }
-                }
-
-                // Log the activity
-                log_activity($this->current_user->id, lang('items_act_create_record') .': '. $insert_id .' : '. $this->input->ip_address(), 'items');
-                Template::set_message(lang('items_create_success'), 'success');
-                redirect('/');
-            }
-            else
-            {
-                Template::set_message(lang('items_create_failure') . $this->items_model->error, 'error');
-            }
-        }
-
-        $this->set_current_user();
-        Template::set_view('home/add-item');
-        Template::render();
     }
 
-    private function save_items($type='insert')
+    //--------------------------------------------------------------------
+
+    /**
+     * If the Auth lib is loaded, it will set the current user, since users
+     * will never be needed if the Auth library is not loaded. By not requiring
+     * this to be executed and loaded for every command, we can speed up calls
+     * that don't need users at all, or rely on a different type of auth, like
+     * an API or cronjob.
+     *
+     * Copied from Base_Controller
+     */
+    protected function set_current_user()
     {
-        // make sure we only pass in the fields we want
-
-        $data = array();
-        $data['category']           = $this->input->post('items_category');
-        $data['name']               = $this->input->post('items_name');
-        $data['description']        = $this->input->post('items_description');
-        $data['specifications']     = $this->input->post('items_specifications');
-        $data['quantity']           = $this->input->post('items_quantity');
-        $data['price']              = $this->input->post('items_price');
-        $data['status']             = $this->input->post('items_status');
-
-        if ($type == 'insert')
+        if (class_exists('Auth'))
         {
-            $id = $this->items_model->insert($data);
-
-            if (is_numeric($id))
+            // Load our current logged in user for convenience
+            if ($this->auth->is_logged_in())
             {
-                $return = $id;
+                $this->current_user = clone $this->auth->user();
+
+                $this->current_user->user_img = gravatar_link($this->current_user->email, 22, $this->current_user->email, "{$this->current_user->email} Profile");
+
+                // if the user has a language setting then use it
+                if (isset($this->current_user->language))
+                {
+                    $this->config->set_item('language', $this->current_user->language);
+                }
             }
             else
             {
-                $return = FALSE;
+                $this->current_user = null;
             }
-        }
 
-        return $return;
+            // Make the current user available in the views
+            if (!class_exists('Template'))
+            {
+                $this->load->library('Template');
+            }
+
+            Template::set('current_user', $this->current_user);
+        }
     }
 
-    public function return_item() {
-        Assets::add_css(array(Template::theme_url('css/return-item.css')));
-        Assets::add_js(Template::theme_url('js/return-item.js'), 'external', true);
-
-        $this->set_current_user();
-        Template::set_view('home/return-item');
-        Template::render();
-    }
-
-    public function return_item_ajax() {
-        $itemid     = $this->input->post('id');
-        $quantity   = $this->input->post('qty');
-        $status     = 'lacking';
-
-        $item       = $this->returned_items_model->find($itemid);
-        if($item->return_qty > 0 && $item->return_qty != '') {
-            $quantity = $quantity + $item->return_qty;
-            if($quantity >= $item->quantity) {
-                $quantity   = $item->quantity;
-                $status     = 'for approval';
-            }
-        }
-        else {
-            if($quantity >= $item->quantity) {
-                $quantity   = $item->quantity;
-                $status     = 'for approval';
-            }
-        }
-
-        $data = array(
-            'return_qty'    => $quantity,
-            'status'        => $status
-        );
-        $this->db->where('id', $itemid);
-        $this->db->update('bf_returned_items', $data);
-
-        $data = array(
-            'user_id'       => $this->current_user->id,
-            'role_user'     => 'admin',
-            'description'   => 'A User returned an item',
-            'page'          => site_url().'admin/logs/returned_items/edit/'.$this->db->insert_id(),
-            'seen'          => 'No',
-            'created_on'    => date('Y-m-d H:i:s'),
-            'modified_on'   => date('Y-m-d H:i:s')
-        );
-        $this->db->insert('bf_notifications', $data);
-
-        $result = array(
-            'quantity'  => $quantity,
-            'status'    => $status,
-            'result'    => 'success'
-        );
-
-        die(json_encode($result));
-    }
-
-    public function return_item_list_ajax() {
-        $this->load->model('lab_incharge/lab_incharge_model', null, true);
-        $this->load->model('students/students_model', null, true);
-
-        $body       = '';
-        $type       = $this->input->post('type');
-
-        $user       = $this->auth->user();
-        $worker     = $this->lab_incharge_model->find_by('user_id',$user->id);
-        if(!empty($worker)) {
-            $this->returned_items_model->where('worker_id',$worker->worker_id);
-        }
-        $student    = $this->students_model->find_by('user_id',$user->id);
-        if(!empty($student)) {
-            $this->returned_items_model->where('student_id',$student->student_id);
-        }
-
-        $this->returned_items_model->order_by('created_on', 'desc');
-        switch($type) {
-            case 'lacking':
-                $items = $this->returned_items_model->find_all_by('status','lacking');
-            break;
-            case 'for approval':
-                $items = $this->returned_items_model->find_all_by('status','for approval');
-                break;
-            case 'returned':
-                $items = $this->returned_items_model->find_all_by('status','returned');
-            break;
-            default:
-                $items = $this->returned_items_model->find_all();
-            break;
-        }
-
-        if(!empty($items)) {
-            foreach($items as $row) {
-                $disabled = '';
-                $item = $this->items_model->find($row->item_id);
-                if($row->status == 'for approval' || $row->status == 'returned') {
-                    $disabled = 'disabled';
-                }
-                $body .= '<tr>
-                        <td>'.$row->id.'<input type="hidden" class="item-id" value="'.$row->id.'"></td>
-                        <td>'.$item->name.'</td>
-                        <td class="align-right">'.$item->quantity.'</td>
-                        <td class="align-right">'.$row->quantity.'<input type="hidden" class="borrow-qty" value="'.$row->quantity.'"></td>
-                        <td class="align-right"><span class="span-return-qty">'.$row->return_qty.'</span><input type="hidden" class="return-qty" value="'.$row->return_qty.'"></td>
-                        <td>'.$row->due_date.'</td>
-                        <td>'.$row->overdue_charge.'</td>
-                        <td><span class="span-status">'.$row->status.'</span></td>
-                        <td class="align-right">
-                            <div class="input-append input-prepend">
-                                <span class="add-on">Pieces</span>
-                                <input class="align-right span5 return-qty" type="text" value="0" '.$disabled.'>
-                                <button class="btn btn-success return-btn" type="button" '.$disabled.'>Return</button>
-                            </div>
-                        </td>
-                    </tr>';
-            }
-        }
-        else {
-            $body .= '<tr>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td class="align-right">&nbsp;</td>
-                        <td class="align-right">&nbsp;</td>
-                        <td class="align-right">&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td class="align-right">&nbsp;</td>
-                    </tr>';
-        }
-
-        die($body);
-    }
-
-    public function item_list_ajax() {
-        $user   = $this->auth->user();
-        $body   = '';
-        $page   = $this->input->post('page');
-        $search = $this->input->post('search');
-        $search = trim($search);
-
-        $page   = $page-2 < 0 ? 0 : (($page+10)-2);
-        $this->items_model->offset($page);
-        $this->items_model->limit(10);
-
-        if($search != '')
-            $this->items_model->like('name',$search,'both');
-
-        $items  = $this->items_model->find_all();
-
-        if(!empty($items)) {
-            $count  = count($items) / 5;
-            if($count < 2) {
-                $body .= '<div class="pbox-row">';
-                for($x=0;$x<5;$x++) {
-                    if(isset($items[$x]) && !empty($items[$x])) {
-                        if($items[$x]->photo == '')
-                            $path = Template::theme_url('images/default.png');
-                        else
-                            $path = '/userfiles/item-'.$items[$x]->id.'/photos/'.$items[$x]->photo;
-
-                        if(isset($user->role_id) && $user->role_id != 1) {
-                            $button = '<a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
-                                        <i class="icon-shopping-cart icon-white"></i> Add to cart
-                                    </a>';
-                        }
-                        else {
-                            $button = '';
-                        }
-
-                        if($items[$x]->category == 'apparatus') {
-                            $category = '<span>Quantity:</span> <span class="actual-quantity" actual-qty="'.$items[$x]->quantity.'">'.$items[$x]->quantity.'</span>';
-                        }
-                        else {
-                            $category = '<span>Price:</span> <span class="actual-price" actual-price="'.$items[$x]->price.'">'.$items[$x]->price.' - '.$items[$x]->specifications.'</span>';
-                        }
-
-                        $body .= '<div class="pbox">
-                                    <div>
-                                        <img src="'.$path.'" class="img-polaroid">
-                                    </div>
-                                    <div class="item-name" thisid="'.$items[$x]->id.'">'.$items[$x]->name.'</div>
-                                    <div>
-                                        '.$category.'
-                                    </div>
-                                    <div>
-                                        '.$button.'
-                                    </div>
-                                </div>';
-                    }
-                }
-                $body .= '</div>';
-
-                $body .= '<div class="pbox-row">';
-                for($x=5;$x<10;$x++) {
-                    if(isset($items[$x]) && !empty($items[$x])) {
-                        if($items[$x]->photo == '')
-                            $path = Template::theme_url('images/default.png');
-                        else
-                            $path = '/userfiles/item-'.$items[$x]->id.'/photos/'.$items[$x]->photo;
-
-                        if(isset($user->role_id) && $user->role_id != 1) {
-                            $button = '<a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$x]->id.'">
-                                        <i class="icon-shopping-cart icon-white"></i> Add to cart
-                                    </a>';
-                        }
-                        else {
-                            $button = '';
-                        }
-
-                        if($items[$x]->category == 'apparatus') {
-                            $category = '<span>Quantity:</span> <span class="actual-quantity" actual-qty="'.$items[$x]->quantity.'">'.$items[$x]->quantity.'</span>';
-                        }
-                        else {
-                            $category = '<span>Price:</span> <span class="actual-price" actual-price="'.$items[$x]->price.'">'.$items[$x]->price.' - '.$items[$x]->specifications.'</span>';
-                        }
-
-                        $body .= '<div class="pbox">
-                                    <div>
-                                        <img src="'.$path.'" class="img-polaroid">
-                                    </div>
-                                    <div class="item-name" thisid="'.$items[$x]->id.'">'.$items[$x]->name.'</div>
-                                    <div>
-                                        '.$category.'
-                                    </div>
-                                    <div>
-                                        '.$button.'
-                                    </div>
-                                </div>';
-                    }
-                }
-
-                $body .= '</div>';
-            }
-            else if($count == 2) {
-                for($x=0;$x<$count;$x++) {
-                    $body .= '<div class="pbox-row">';
-                    for($y=0;$y<5;$y++) {
-                        $num = $x * 5;
-                        if($items[$y+$num]->photo == '')
-                            $path = Template::theme_url('images/default.png');
-                        else
-                            $path = '/userfiles/item-'.$items[$y+$num]->id.'/photos/'.$items[$y+$num]->photo;
-
-                        if(isset($user->role_id) && $user->role_id != 1) {
-                            $button = '<a class="btn btn-success borrow-item" href="javascript:void(0);" id="product-item-'.$items[$y+$num]->id.'">
-                                            <i class="icon-shopping-cart icon-white"></i> Add to cart
-                                        </a>';
-                        }
-                        else {
-                            $button = '';
-                        }
-
-                        if($items[$x]->category == 'apparatus') {
-                            $category = '<span>Quantity:</span> <span class="actual-quantity" actual-qty="'.$items[$x]->quantity.'">'.$items[$x]->quantity.'</span>';
-                        }
-                        else {
-                            $category = '<span>Price:</span> <span class="actual-price" actual-price="'.$items[$x]->price.'">'.$items[$x]->price.' - '.$items[$x]->specifications.'</span>';
-                        }
-
-                        $body .= '<div class="pbox">
-                                    <div>
-                                        <img src="'.$path.'" class="img-polaroid">
-                                    </div>
-                                    <div class="item-name" thisid="'.$items[$y+$num]->id.'">'.$items[$y+$num]->name.'</div>
-                                    <div>
-                                        '.$category.'
-                                    </div>
-                                    <div>
-                                        '.$button.'
-                                    </div>
-                                </div>';
-                    }
-                    $body .= '</div>';
-                }
-            }
-
-            $body = $this->make_pagination($body,0,$search);
-        }
-
-        die($body);
-    }
-
-    private function make_pagination($body = '',$page = 0,$search = '') {
-        $pages = '';
-        if($page == 0) {
-            $this->items_model->offset($page);
-
-            if($search != '') {
-                $this->items_model->like('name',$search,'both');
-            }
-            $items  = $this->items_model->find_all();
-            $count  = count($items) / 10;
-            $ex = explode('.',$count);
-            if(isset($ex[1]) != '')
-                $count = $ex[0] + 1;
-
-            if($count > 3) {
-                $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="1">Prev</a></li>';
-                for($x=0; $x<3; $x++) {
-                    $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="'.($x+1).'">'.($x+1).'</a></li>';
-                }
-                $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="3">Next</a></li>';
-            }
-            else {
-                $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="1">Prev</a></li>';
-
-
-                for($x=0; $x<$count; $x++) {
-                    $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="'.($x+1).'">'.($x+1).'</a></li>';
-                }
-                $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="'.$count.'">Next</a></li>';
-            }
-        }
-        else if($page > 0){
-            $this->items_model->offset($page);
-            $items  = $this->items_model->find_all();
-
-            $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="'.($page-1).'">Prev</a></li>';
-            $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="'.($page-1).'">'.($page-1).'</a></li>';
-            $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="'.($page).'">'.($page).'</a></li>';
-
-            $this->items_model->offset($page+1);
-            $items  = $this->items_model->find_all();
-            if(count($items) > 0) {
-                $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="'.($page+1).'">'.($page+1).'</a></li>';
-                $pages .= '<li><a class="page-link" href="javascript:void(0);" pageno="'.($page+1).'">Next</a></li>';
-            }
-        }
-        $pagination = '<div class="pagination">
-                        <ul>
-                        '.$pages.'
-                        </ul>
-                    </div>';
-        $body .= $pagination;
-
-        return $body;
-    }
-
-    public function items_checkout_ajax() {
-        $confirm_code = substr(md5(uniqid(rand(), true)), 16, 16);
-        $this->load->model('lab_incharge/lab_incharge_model', null, true);
-        $this->load->model('students/students_model', null, true);
-
-        $is_worker  = false;
-        $is_student = false;
-        $user       = $this->auth->user();
-        $items      = $this->input->post('items');
-
-        $worker     = $this->lab_incharge_model->find_by('user_id',$user->id);
-        if(!empty($worker))
-            $is_worker = true;
-        $student    = $this->students_model->find_by('user_id',$user->id);
-        if(!empty($student))
-            $is_student = true;
-
-        for($x=0; $x<count($items); $x++) {
-            $item = $this->items_model->find($items[$x]['id']);
-
-            if($is_worker) {
-                $data = array(
-                    'worker_id'         => $worker->worker_id,
-                    'item_id'           => $items[$x]['id'],
-                    'quantity'          => $items[$x]['qty'],
-                    'status'            => 'pending',
-                    'id_number'         => $worker->id_number,
-                    'created_on'        => date('Y-m-d H:i:s'),
-                    'modified_on'       => date('Y-m-d H:i:s')
-                );
-                $this->db->insert('bf_returned_items', $data);
-
-                $data = array(
-                    'user_id'       => 1,
-                    'role_user'     => 'admin',
-                    'description'   => 'A Lab-Incharge borrowed an item',
-                    'page'          => site_url().'admin/logs/returned_items/edit/'.$this->db->insert_id(),
-                    'seen'          => 'No',
-                    'created_on'    => date('Y-m-d H:i:s'),
-                    'modified_on'   => date('Y-m-d H:i:s')
-                );
-                $this->db->insert('bf_notifications', $data);
-            }
-            else if($is_student) {
-                $data = array(
-                    'student_id'        => $student->student_id,
-                    'item_id'           => $items[$x]['id'],
-                    'quantity'          => $items[$x]['qty'],
-                    'status'            => 'pending',
-                    'id_number'         => $student->id_number,
-                    'created_on'        => date('Y-m-d H:i:s'),
-                    'modified_on'       => date('Y-m-d H:i:s')
-                );
-                $this->db->insert('bf_returned_items', $data);
-
-                $data = array(
-                    'user_id'       => 1,
-                    'role_user'     => 'admin',
-                    'description'   => 'Student borrowed an item',
-                    'page'          => site_url().'admin/logs/returned_items/edit/'.$this->db->insert_id(),
-                    'seen'          => 'No',
-                    'created_on'    => date('Y-m-d H:i:s'),
-                    'modified_on'   => date('Y-m-d H:i:s')
-                );
-                $this->db->insert('bf_notifications', $data);
-            }
-        }
-
-        $array = array(
-            'code'      => '',
-            'result'    => 'success'
-        );
-        die(json_encode($array));
-    }
-
-	/**
-	 * If the Auth lib is loaded, it will set the current user, since users
-	 * will never be needed if the Auth library is not loaded. By not requiring
-	 * this to be executed and loaded for every command, we can speed up calls
-	 * that don't need users at all, or rely on a different type of auth, like
-	 * an API or cronjob.
-	 *
-	 * Copied from Base_Controller
-	 */
-	protected function set_current_user()
-	{
-		if (class_exists('Auth'))
-		{
-            // Load our current logged in user for convenience
-			if ($this->auth->is_logged_in())
-			{
-				$this->current_user = clone $this->auth->user();
-
-				$this->current_user->user_img = gravatar_link($this->current_user->email, 22, $this->current_user->email, "{$this->current_user->email} Profile");
-
-				// if the user has a language setting then use it
-				if (isset($this->current_user->language))
-				{
-					$this->config->set_item('language', $this->current_user->language);
-				}
-			}
-			else
-			{
-				$this->current_user = null;
-			}
-
-			// Make the current user available in the views
-			if (!class_exists('Template'))
-			{
-				$this->load->library('Template');
-			}
-
-			Template::set('current_user', $this->current_user);
-		}
-	}
-
-    public function transactions() {
+    public function index()
+    {
+        $this->load->library('installer_lib');
         $this->load->model('lab_incharge/lab_incharge_model', null, true);
         $this->load->model('students/students_model', null, true);
 
@@ -711,7 +155,7 @@ class Home extends CI_Controller
 
 
         Template::render();
-    }
+    }//end index()
 
     private function transactions_pagination($page = 0) {
         $body = '';
@@ -847,7 +291,7 @@ class Home extends CI_Controller
                 }
 
                 $body .= '</tbody></table>';
-            break;
+                break;
             case 'lacking':
                 $body .= '<table class="table table-bordered table-lacking">
                     <thead>
@@ -885,24 +329,24 @@ class Home extends CI_Controller
                             </thead>
                             <tbody>';
 
-                            foreach($items as $row) {
-                                $item = $this->items_model->find($row->item_id);
-                                $body .= '<tr>
+                foreach($items as $row) {
+                    $item = $this->items_model->find($row->item_id);
+                    $body .= '<tr>
                                             <td>'.$item->name.'</td>
                                             <td class="text-right">'.$row->quantity.'</td>
                                             <td>'.$row->created_on.'</td>
                                             <td>'.$row->due_date.'</td>
                                             <td class="text-right">'.$row->overdue_charge.'</td>
                                         </tr>';
-                                $total = $total + $row->overdue_charge;
-                            }
-                            $body .= '<tr>
+                    $total = $total + $row->overdue_charge;
+                }
+                $body .= '<tr>
                                         <td><strong>TOTAL</strong></td>
                                         <td colspan="4" class="text-right"><strong>'.$total.'</strong></td>
                                             </tr>
                                             </tbody>
                                         </table>';
-            break;
+                break;
             case 'returned':
                 $total1 = 0;
                 $total2 = 0;
@@ -1311,7 +755,7 @@ class Home extends CI_Controller
                 $this->db->where('created_on', $date);
                 $this->db->where('status', $status);
                 $this->db->update('bf_returned_items', $data);
-            break;
+                break;
             case 'approved':
                 $message    = '';
                 $continue   = true;
@@ -1404,7 +848,7 @@ class Home extends CI_Controller
                 else {
                     die('low quantity');
                 }
-            break;
+                break;
             case 'borrowed':
                 $items = $this->input->post('items');
                 for($x=0; $x<count($items); $x++) {
@@ -1464,7 +908,7 @@ class Home extends CI_Controller
                         $this->db->update('bf_returned_items', $data);
                     }
                 }
-            break;
+                break;
         }
 
         die('success');
@@ -1586,120 +1030,6 @@ class Home extends CI_Controller
         return $body;
     }
 
-    public function notifications() {
-        $this->set_current_user();
-
-        if($this->current_user->role_desc == '') {
-            $id = $this->current_user->id;
-            $role = 'admin';
-            Template::set_view('home/notifications');
-        }
-        else {
-            $worker     = $this->lab_incharge_model->find_by('user_id',$this->current_user->id);
-            if(!empty($worker)) {
-                $id = $worker->user_id;
-                $role = 'labincharge';
-            }
-            $student    = $this->students_model->find_by('user_id',$this->current_user->id);
-            if(!empty($student)) {
-                $id = $student->user_id;
-                $role = 'student';
-            }
-            Template::set_view('home/notifications_user');
-        }
-
-        $this->notifications_model->update_where('seen', 'No', array('seen' => 'Yes','user_id' => $id, 'role_user' => $role));
-
-        $this->notifications_model->limit(20);
-        $this->notifications_model->order_by('created_on', 'desc');
-        $this->notifications_model->where('user_id', $id);
-        $this->notifications_model->where('role_user', $role);
-        $rows = $this->notifications_model->find_all();
-
-        Template::set('rows',$rows);
-        Template::render();
-    }
-
-    public function get_notifications() {
-        $this->set_current_user();
-
-        if(empty($this->current_user))
-            return false;
-
-        if($this->current_user->role_desc == '') {
-            $id = $this->current_user->id;
-            $role = 'admin';
-        }
-        else {
-            $worker     = $this->lab_incharge_model->find_by('user_id',$this->current_user->id);
-            if(!empty($worker)) {
-                $id = $worker->worker_id;
-                $role = 'labincharge';
-            }
-            $student    = $this->students_model->find_by('user_id',$this->current_user->id);
-            if(!empty($student)) {
-                $id = $student->student_id;
-                $role = 'student';
-            }
-        }
-
-        $this->notifications_model->where('user_id',$id);
-        $this->notifications_model->where('role_user',$role);
-        $rows = $this->notifications_model->count_by('seen','No');
-
-        $array = array('count' => $rows);
-        die(json_encode($array));
-    }
-
-    public function reports() {
-        $rows = '';
-        $this->set_current_user();
-        $mode = $this->input->post('mode');
-        if($mode == 'daily') {
-            $rows = $this->db->query("SELECT i.`name` AS 'name',
-                                SUM(i.`quantity`) AS 'quantity',
-                                SUM(r.`quantity`) AS 'borrowed_quantity',
-                                SUM(r.`return_qty`) AS 'returned_quantity'
-                                FROM bf_returned_items r
-                                INNER JOIN bf_items i ON i.id = r.`item_id`
-                                WHERE r.created_on >= CURDATE()
-                                AND r.created_on <= CURDATE()
-                                GROUP BY r.`item_id`
-                                ORDER BY borrowed_quantity DESC");
-        }
-        else if($mode == 'weekly') {
-            $rows = $this->db->query("SELECT i.`name` AS 'name',
-                                SUM(i.`quantity`) AS 'quantity',
-                                SUM(r.`quantity`) AS 'borrowed_quantity',
-                                SUM(r.`return_qty`) AS 'returned_quantity'
-                                FROM bf_returned_items r
-                                INNER JOIN bf_items i ON i.id = r.`item_id`
-                                WHERE r.created_on >= ADDDATE(CURDATE(), INTERVAL 1-DAYOFWEEK(CURDATE()) DAY)
-                                AND r.created_on <= ADDDATE(CURDATE(), INTERVAL 7-DAYOFWEEK(CURDATE()) DAY)
-                                GROUP BY r.`item_id`
-                                ORDER BY borrowed_quantity DESC");
-        }
-        else if($mode == 'monthly') {
-            $rows = $this->db->query("SELECT i.`name` AS 'name',
-                                SUM(i.`quantity`) AS 'quantity',
-                                SUM(r.`quantity`) AS 'borrowed_quantity',
-                                SUM(r.`return_qty`) AS 'returned_quantity'
-                                FROM bf_returned_items r
-                                INNER JOIN bf_items i ON i.id = r.`item_id`
-                                WHERE r.created_on >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
-                                AND r.created_on <= LAST_DAY(CURDATE())
-                                GROUP BY r.`item_id`
-                                ORDER BY borrowed_quantity DESC");
-        }
-
-
-        Assets::add_js(Template::theme_url('js/reports.js'), 'external', true);
-        Template::set('rows',$rows);
-        Template::set('mode',$mode);
-        Template::set_view('home/reports');
-        Template::render();
-    }
-
     public function lacking_details() {
         $body   = '';
         $id     = $this->input->post('id');
@@ -1732,5 +1062,5 @@ class Home extends CI_Controller
         die($body);
     }
 
-	//--------------------------------------------------------------------
+    //--------------------------------------------------------------------
 }//end class
