@@ -243,6 +243,7 @@ class resources extends Admin_Controller
 		$data['specifications']     = $this->input->post('items_specifications');
 		$data['quantity']           = $this->input->post('items_quantity');
         $data['price']              = $this->input->post('items_price');
+        $data['unit_of_measure']    = $this->input->post('items_unit_of_measure');
         $data['penalty']            = $this->input->post('items_penalty');
         $data['damage_charge']      = $this->input->post('items_damage_charge');
 		$data['status']             = $this->input->post('items_status');

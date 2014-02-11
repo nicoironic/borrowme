@@ -187,6 +187,7 @@ class Home extends CI_Controller
         $data['specifications']     = $this->input->post('items_specifications');
         $data['quantity']           = $this->input->post('items_quantity');
         $data['price']              = $this->input->post('items_price');
+        $data['unit_of_measure']    = $this->input->post('items_unit_of_measure');
         $data['status']             = $this->input->post('items_status');
 
         if ($type == 'insert')
@@ -378,7 +379,7 @@ class Home extends CI_Controller
                             $category = '<span>Quantity:</span> <span class="actual-quantity" actual-qty="'.$items[$x]->quantity.'">'.$items[$x]->quantity.'</span>';
                         }
                         else {
-                            $category = '<span>Price:</span> <span class="actual-price" actual-price="'.$items[$x]->price.'">'.$items[$x]->price.' - '.$items[$x]->specifications.'</span>';
+                            $category = '<span>Price:</span> <span class="actual-quantity" actual-unit="'.$items[$x]->unit_of_measure.'" actual-price="'.$items[$x]->price.'" actual-qty="'.$items[$x]->quantity.'">'.$items[$x]->price.' - '.$items[$x]->quantity.$items[$x]->unit_of_measure.'</span>';
                         }
 
                         $body .= '<div class="pbox">
@@ -418,7 +419,7 @@ class Home extends CI_Controller
                             $category = '<span>Quantity:</span> <span class="actual-quantity" actual-qty="'.$items[$x]->quantity.'">'.$items[$x]->quantity.'</span>';
                         }
                         else {
-                            $category = '<span>Price:</span> <span class="actual-price" actual-price="'.$items[$x]->price.'">'.$items[$x]->price.' - '.$items[$x]->specifications.'</span>';
+                            $category = '<span>Price:</span> <span class="actual-quantity" actual-unit="'.$items[$x]->unit_of_measure.'" actual-price="'.$items[$x]->price.'" actual-qty="'.$items[$x]->quantity.'">'.$items[$x]->price.' - '.$items[$x]->quantity.$items[$x]->unit_of_measure.'</span>';
                         }
 
                         $body .= '<div class="pbox">
@@ -461,7 +462,7 @@ class Home extends CI_Controller
                             $category = '<span>Quantity:</span> <span class="actual-quantity" actual-qty="'.$items[$x]->quantity.'">'.$items[$x]->quantity.'</span>';
                         }
                         else {
-                            $category = '<span>Price:</span> <span class="actual-price" actual-price="'.$items[$x]->price.'">'.$items[$x]->price.' - '.$items[$x]->specifications.'</span>';
+                            $category = '<span>Price:</span> <span class="actual-quantity" actual-unit="'.$items[$x]->unit_of_measure.'" actual-price="'.$items[$x]->price.'" actual-qty="'.$items[$x]->quantity.'">'.$items[$x]->price.' - '.$items[$x]->quantity.$items[$x]->unit_of_measure.'</span>';
                         }
 
                         $body .= '<div class="pbox">
@@ -1077,9 +1078,14 @@ class Home extends CI_Controller
                     <tbody>';
                 foreach($items as $row) {
                     $item = $this->items_model->find($row->item_id);
+                    if($item->category == 'chemical')
+                        $unit = ' x 10'.$item->unit_of_measure;
+                    else
+                        $unit = '';
+
                     $body .= '<tr>
                     <td>'.$item->name.'</td>
-                    <td class="text-right">'.$row->quantity.'</td>
+                    <td class="text-right">'.$row->quantity.$unit.'</td>
                     </tr>';
                 }
 
@@ -1096,9 +1102,14 @@ class Home extends CI_Controller
                     <tbody>';
                 foreach($items as $row) {
                     $item = $this->items_model->find($row->item_id);
+                    if($item->category == 'chemical')
+                        $unit = ' x 10'.$item->unit_of_measure;
+                    else
+                        $unit = '';
+
                     $body .= '<tr>
                     <td>'.$item->name.'</td>
-                    <td class="text-right">'.$row->quantity.'</td>
+                    <td class="text-right">'.$row->quantity.$unit.'</td>
                     </tr>';
                 }
 

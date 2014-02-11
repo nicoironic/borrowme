@@ -71,8 +71,16 @@ function item_events() {
             var itemid  = $(parent).find('div.item-name').attr('thisid');
             var item    = $(parent).find('div.item-name').text();
             var qty     = $(parent).find('span.actual-quantity').attr('actual-qty');
+            var price   = $(parent).find('span.actual-quantity').attr('actual-price');
+            var unit    = $(parent).find('span.actual-quantity').attr('actual-unit');
 
-            var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1" readonly/></div></div>';
+            if(parseFloat(price) > 0) {
+                var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1" readonly/> x 10'+unit+'</div></div>';
+            }
+            else {
+                var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1" readonly/></div></div>';
+
+            }
 
             if(parseInt(qty) > 0) {
                 var result  = check_commons(itemid);

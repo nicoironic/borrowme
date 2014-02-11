@@ -73,6 +73,16 @@ $id = isset($items['id']) ? $items['id'] : '';
                 </div>
             </div>
 
+            <?php // Change the values in this array to populate your dropdown as required
+            $options = array(
+                'grams' => 'Grams',
+                'milligrams'  => 'Milligrams',
+                'liters'  => 'Liters',
+            );
+
+            echo form_dropdown('items_unit_of_measure', $options, set_value('items_unit_of_measure', isset($items['unit_of_measure']) ? $items['unit_of_measure'] : ''), 'Unit of measure'. lang('bf_form_label_required'), 'class="span6"');
+            ?>
+
             <div class="control-group <?php echo form_error('penalty') ? 'error' : ''; ?>">
                 <?php echo form_label('Penalty', 'items_penalty', array('class' => 'control-label') ); ?>
                 <div class='controls'>
