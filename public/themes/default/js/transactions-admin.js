@@ -131,7 +131,8 @@ function button_events() {
                 "status"        : $(this).attr('thisstatus'),
                 "code"          : $(this).attr('thisidnumber'),
                 "date_borrowed" : $('table.table-approved input#date-borrowed').val(),
-                "due_date"      : $('table.table-approved input#due-date').val()
+                "due_date"      : $('table.table-approved input#due-date').val(),
+                "overall"       : $(this).parents('table').find('span.overall-sum').text()
             },
             success: function(result,status,xhr) {
                 if(result == 'success') {
@@ -289,6 +290,7 @@ function button_events() {
                     "date"          : $(this).attr('thisdate'),
                     "status"        : $(this).attr('thisstatus'),
                     "code"          : $(this).attr('thisidnumber'),
+                    "overall"       : $(this).parents('table').find('span.overall-sum').text(),
                     "items"         : items
                 },
                 success: function(result,status,xhr) {
@@ -314,6 +316,12 @@ function button_events() {
             });
             $(this).parents('table').find('span.total-item-damage-charge').text(total);
         }
+
+        var dmg = parseFloat($(this).parents('table').find('span.total-item-damage-charge').text());
+        var chr = parseFloat($(this).parents('table').find('span.total-sum').text());
+        var sum = dmg + chr;
+
+        $(this).parents('table').find('span.overall-sum').text(sum);
     });
 
     $('a.lacking-details').unbind('click').click(function() {

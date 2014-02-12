@@ -666,6 +666,9 @@ class Home extends CI_Controller
 
         $user       = $this->auth->user();
 
+        if(empty($user))
+            redirect('/');
+
         if($user->role_desc != '') {
             $page     = $this->input->post('page-num');
             $page_num = $page;
@@ -1044,9 +1047,11 @@ class Home extends CI_Controller
     }
 
     public function inner_table_ajax() {
-        $body = '';
-        $code = $this->input->post('idnum');
-        $date = $this->input->post('date');
+        $sum    = 0;
+        $total  = 0;
+        $body   = '';
+        $code   = $this->input->post('idnum');
+        $date   = $this->input->post('date');
         $status = $this->input->post('status');
         $this->load->model('lab_incharge/lab_incharge_model', null, true);
         $this->load->model('students/students_model', null, true);
@@ -1097,24 +1102,40 @@ class Home extends CI_Controller
                     <tr>
                         <th>Item</th>
                         <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
                     </tr>
                     </thead>
                     <tbody>';
                 foreach($items as $row) {
                     $item = $this->items_model->find($row->item_id);
-                    if($item->category == 'chemical')
+                    if($item->category == 'chemical') {
                         $unit = ' x 10'.$item->unit_of_measure;
-                    else
+                        $sum = $row->quantity * $item->price;
+                        $total += $sum;
+                    }
+                    else {
                         $unit = '';
+                    }
 
                     $body .= '<tr>
                     <td>'.$item->name.'</td>
                     <td class="text-right">'.$row->quantity.$unit.'</td>
+                    <td class="text-right">'.$item->price.'</td>
+                    <td class="text-right">'.$sum.'</td>
                     </tr>';
                 }
 
                 $body .= '<tr>
-                            <td colspan="2" style="text-align:right;">
+                                <td colspan="3">
+                                    <strong>Total:</strong>
+                                </td>
+                                <td class="text-right">
+                                    <span class="overall-sum">'.$total.'</span>
+                                </td>
+                          </tr>
+                          <tr>
+                            <td colspan="4" style="text-align:right;">
                                 <div class="input-prepend">
                                   <span class="add-on"><i class="icon-calendar"></i></span>
                                   <input class="span2 date-borrowed datepicker" id="date-borrowed" type="text" placeholder="Date Borrowed" value="">
@@ -1195,9 +1216,13 @@ class Home extends CI_Controller
                     }
                 }
                 $body .= '<tr>
+                            <td>&nbsp;</td>
+                            <td colspan="3" class="text-right"><span class="total-item-damage-charge">&nbsp;</span></td>
+                            <td colspan="5" class="text-right"><strong><span class="total-sum">'.$total.'</span></strong></td>
+                          </tr>
+                          <tr>
                             <td><strong>TOTAL</strong></td>
-                            <td colspan="2" class="text-right"><span class="total-item-damage-charge">&nbsp;</span></td>
-                            <td colspan="6" class="text-right"><strong>'.$total.'</strong></td>
+                            <td colspan="8" class="text-right"><strong><span class="overall-sum">'.$total.'</span></strong></td>
                           </tr>
                           <tr>
                             <td colspan="9" class="text-right">
@@ -1334,35 +1359,63 @@ class Home extends CI_Controller
                 foreach($items as $row) {
                     $item = $this->items_model->find($row->item_id);
 
-                    if($item->quantity < $row->quantity) {
-                        if($row->worker_id != null && $row->worker_id != 0) {
-                            $user_id = $row->worker_id;
-                            $role = 'labincharge';
-                        }
-                        else {
-                            $user_id = $row->student_id;
-                            $role = 'student';
-                        }
-                        $data = array(
-                            'user_id'       => $user_id,
-                            'role_user'     => $role,
-                            'description'   => 'BORROW REJECTED: '.$item->name.' quantity is short of '.abs($item->quantity - $row->quantity),
-                            'page'          => '',
-                            'details'       => '[ID:'.$row->id.'] [DATE:'.$row->created_on.']',
-                            'seen'          => 'No',
-                            'created_on'    => date('Y-m-d H:i:s'),
-                            'modified_on'   => date('Y-m-d H:i:s')
-                        );
-                        $this->db->insert('bf_notifications', $data);
+                    if($item->category == 'apparatus') {
+                        if($item->quantity < $row->quantity) {
+                            if($row->worker_id != null && $row->worker_id != 0) {
+                                $user_id = $row->worker_id;
+                                $role = 'labincharge';
+                            }
+                            else {
+                                $user_id = $row->student_id;
+                                $role = 'student';
+                            }
+                            $data = array(
+                                'user_id'       => $user_id,
+                                'role_user'     => $role,
+                                'description'   => 'BORROW REJECTED: '.$item->name.' quantity is short of '.abs($item->quantity - $row->quantity),
+                                'page'          => '',
+                                'details'       => '[ID:'.$row->id.'] [DATE:'.$row->created_on.']',
+                                'seen'          => 'No',
+                                'created_on'    => date('Y-m-d H:i:s'),
+                                'modified_on'   => date('Y-m-d H:i:s')
+                            );
+                            $this->db->insert('bf_notifications', $data);
 
-                        $continue = false;
+                            $continue = false;
+                        }
                     }
+                    else if($item->category == 'chemical') {
+                        if($item->quantity < ($row->quantity * 10)) {
+                            if($row->worker_id != null && $row->worker_id != 0) {
+                                $user_id = $row->worker_id;
+                                $role = 'labincharge';
+                            }
+                            else {
+                                $user_id = $row->student_id;
+                                $role = 'student';
+                            }
+                            $data = array(
+                                'user_id'       => $user_id,
+                                'role_user'     => $role,
+                                'description'   => 'BORROW REJECTED: '.$item->name.' quantity is short of '.abs($item->quantity - $row->quantity),
+                                'page'          => '',
+                                'details'       => '[ID:'.$row->id.'] [DATE:'.$row->created_on.']',
+                                'seen'          => 'No',
+                                'created_on'    => date('Y-m-d H:i:s'),
+                                'modified_on'   => date('Y-m-d H:i:s')
+                            );
+                            $this->db->insert('bf_notifications', $data);
 
+                            $continue = false;
+                        }
+                    }
                 }
 
                 if($continue) {
                     $date_borrowed  = $this->input->post('date_borrowed');
                     $due_date       = $this->input->post('due_date');
+                    $overall        = $this->input->post('overall');
+
                     $data = array(
                         'status'        => 'borrowed',
                         'date_borrowed' => $date_borrowed,
@@ -1380,9 +1433,17 @@ class Home extends CI_Controller
                     $items = $this->returned_items_model->find_all();
                     foreach($items as $row) {
                         $item = $this->items_model->find($row->item_id);
-                        $data = array(
-                            'quantity'  => $item->quantity - $row->quantity
-                        );
+                        if($item->category == 'apparatus') {
+                            $data = array(
+                                'quantity'  => $item->quantity - $row->quantity
+                            );
+                        }
+                        else if($item->category == 'chemical') {
+                            $data = array(
+                                'quantity'  => $item->quantity - ($row->quantity * 10)
+                            );
+                        }
+
                         $this->db->where('id',$row->item_id);
                         $this->db->update('bf_items', $data);
 
@@ -1397,15 +1458,16 @@ class Home extends CI_Controller
 
                         $message .= $item->name.',';
                     }
+
+
+
                     $message = 'ITEMS: '.trim($message,',').' are available for pick-up. If DONE, ignore this message.';
-
-
                     $data = array(
                         'user_id'       => $user_id,
                         'role_user'     => $role,
                         'description'   => $message,
                         'page'          => '',
-                        'details'       => '[ID:'.$row->id.'] [DATE:'.$row->created_on.']',
+                        'details'       => '[ID:'.$row->id.'] [DATE:'.$row->created_on.'] [TOTAL:'.$overall.']',
                         'seen'          => 'No',
                         'created_on'    => date('Y-m-d H:i:s'),
                         'modified_on'   => date('Y-m-d H:i:s')
@@ -1417,7 +1479,9 @@ class Home extends CI_Controller
                 }
             break;
             case 'borrowed':
-                $items = $this->input->post('items');
+                $items      = $this->input->post('items');
+                $overall    = $this->input->post('overall');
+
                 for($x=0; $x<count($items); $x++) {
                     $ret  = $this->returned_items_model->find($items[$x]['id']);
 
@@ -1444,11 +1508,21 @@ class Home extends CI_Controller
                         // ADD UP the quantity to the item's quantity
                         $ret  = $this->returned_items_model->find($items[$x]['id']);
                         $item = $this->items_model->find($ret->item_id);
-                        $data = array(
-                            'quantity'  => $item->quantity + $items[$x]['qty']
-                        );
+                        if($item->category == 'apparatus') {
+                            $data = array(
+                                'quantity'  => $item->quantity + $items[$x]['qty']
+                            );
+                        }
+                        else if($item->category == 'chemical') {
+                            $data = array(
+                                'quantity'  => $item->quantity + ($items[$x]['qty'] * 10)
+                            );
+                        }
+
                         $this->db->where('id',$ret->item_id);
                         $this->db->update('bf_items', $data);
+
+
                     }
                     else {
                         // FULL RETURN QUANTITY
@@ -1461,9 +1535,17 @@ class Home extends CI_Controller
 
                         $ret  = $this->returned_items_model->find($items[$x]['id']);
                         $item = $this->items_model->find($ret->item_id);
-                        $data = array(
-                            'quantity'  => $item->quantity + $items[$x]['qty']
-                        );
+                        if($item->category == 'apparatus') {
+                            $data = array(
+                                'quantity'  => $item->quantity + $items[$x]['qty']
+                            );
+                        }
+                        else if($item->category == 'chemical') {
+                            $data = array(
+                                'quantity'  => $item->quantity + ($items[$x]['qty'] * 10)
+                            );
+                        }
+
                         $this->db->where('id',$ret->item_id);
                         $this->db->update('bf_items', $data);
 
@@ -1474,7 +1556,33 @@ class Home extends CI_Controller
                         $this->db->where('id', $items[$x]['id']);
                         $this->db->update('bf_returned_items', $data);
                     }
+
+                    if($ret->worker_id != null && $ret->worker_id != 0) {
+                        $user_id = $ret->worker_id;
+                        $role = 'labincharge';
+                    }
+                    else {
+                        $user_id = $ret->student_id;
+                        $role = 'student';
+                    }
+                    $ret_id         = $ret->id;
+                    $ret_created_on = $ret->created_on;
                 }
+
+                if($overall > 0) {
+                    $data = array(
+                        'user_id'       => $user_id,
+                        'role_user'     => $role,
+                        'description'   => 'You have a PENALTY CHARGE to pay!',
+                        'page'          => '',
+                        'details'       => '[ID:'.$ret_id.'] [DATE:'.$ret_created_on.'] [TOTAL:'.$overall.']',
+                        'seen'          => 'No',
+                        'created_on'    => date('Y-m-d H:i:s'),
+                        'modified_on'   => date('Y-m-d H:i:s')
+                    );
+                    $this->db->insert('bf_notifications', $data);
+                }
+
             break;
         }
 
