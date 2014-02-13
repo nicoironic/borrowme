@@ -1780,7 +1780,10 @@ class Home extends CI_Controller
             $rows = $this->db->query("SELECT i.`name` AS 'name',
                                 SUM(i.`quantity`) AS 'quantity',
                                 SUM(r.`quantity`) AS 'borrowed_quantity',
-                                SUM(r.`return_qty`) AS 'returned_quantity'
+                                SUM(r.`return_qty`) AS 'returned_quantity',
+                                SUM(r.`quantity`) * 10 AS 'total_quantity',
+                                SUM(r.`return_qty`) * i.price AS 'total_cost',
+                                unit_of_measure
                                 FROM bf_returned_items r
                                 INNER JOIN bf_items i ON i.id = r.`item_id`
                                 WHERE r.created_on >= CURDATE()
@@ -1793,7 +1796,10 @@ class Home extends CI_Controller
             $rows = $this->db->query("SELECT i.`name` AS 'name',
                                 SUM(i.`quantity`) AS 'quantity',
                                 SUM(r.`quantity`) AS 'borrowed_quantity',
-                                SUM(r.`return_qty`) AS 'returned_quantity'
+                                SUM(r.`return_qty`) AS 'returned_quantity',
+                                SUM(r.`quantity`) * 10 AS 'total_quantity',
+                                SUM(r.`return_qty`) * i.price AS 'total_cost',
+                                unit_of_measure
                                 FROM bf_returned_items r
                                 INNER JOIN bf_items i ON i.id = r.`item_id`
                                 WHERE r.created_on >= ADDDATE(CURDATE(), INTERVAL 1-DAYOFWEEK(CURDATE()) DAY)
@@ -1806,7 +1812,10 @@ class Home extends CI_Controller
             $rows = $this->db->query("SELECT i.`name` AS 'name',
                                 SUM(i.`quantity`) AS 'quantity',
                                 SUM(r.`quantity`) AS 'borrowed_quantity',
-                                SUM(r.`return_qty`) AS 'returned_quantity'
+                                SUM(r.`return_qty`) AS 'returned_quantity',
+                                SUM(r.`quantity`) * 10 AS 'total_quantity',
+                                SUM(r.`return_qty`) * i.price AS 'total_cost',
+                                unit_of_measure
                                 FROM bf_returned_items r
                                 INNER JOIN bf_items i ON i.id = r.`item_id`
                                 WHERE r.created_on >= DATE_FORMAT(CURDATE(), '%Y-%m-01')

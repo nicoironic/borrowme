@@ -1,9 +1,4 @@
-.align-left {
-    text-align: left !important;
-}
-.align-right {
-    text-align: right !important;
-}
+
 div.processing {
     position: absolute;
     width: 100%;

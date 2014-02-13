@@ -42,23 +42,39 @@
     <div class="reports-body">
         <table class="table table-bordered" id="returned-items-table">
             <thead>
+            <?php if($category == 'apparatus') { ?>
             <tr>
                 <th>Item</th>
                 <th>Quantity</th>
                 <th>Borrowed Quantity</th>
                 <th>Returned Quantity</th>
             </tr>
+            <?php } else { ?>
+            <tr>
+                <th>Item</th>
+                <th>Overall Weight Purchased</th>
+                <th>Overall Cost</th>
+            </tr>
+            <?php } ?>
             </thead>
             <tbody id="dynamic-tbody">
             <?php
             if(!empty($rows)):
             foreach($rows->result() as $row) { ?>
-            <tr>
-                <td><?php echo $row->name; ?></td>
-                <td><?php echo $row->quantity; ?></td>
-                <td><?php echo $row->borrowed_quantity; ?></td>
-                <td><?php echo $row->returned_quantity; ?></td>
-            </tr>
+                <?php if($category == 'apparatus') { ?>
+                    <tr>
+                        <td><?php echo $row->name; ?></td>
+                        <td class="align-right"><?php echo $row->quantity; ?></td>
+                        <td class="align-right"><?php echo $row->borrowed_quantity; ?></td>
+                        <td class="align-right"><?php echo $row->returned_quantity; ?></td>
+                    </tr>
+                <?php } else { ?>
+                    <tr>
+                        <td><?php echo $row->name; ?></td>
+                        <td class="align-right"><?php echo $row->total_quantity.' '.$row->unit_of_measure; ?></td>
+                        <td class="align-right"><?php echo $row->total_cost; ?></td>
+                    </tr>
+                <?php } ?>
             <?php } endif; ?>
             </tbody>
         </table>
