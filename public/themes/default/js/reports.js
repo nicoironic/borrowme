@@ -7,4 +7,9 @@ $( document ).ready(function() {
 
         $(this).parents('form').submit();
     });
+    $('ul.category li a.category').click(function() {
+        $('input#category').val($(this).attr('category'));
+
+        $(this).parents('form').submit();
+    });
 });

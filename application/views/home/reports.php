@@ -4,18 +4,39 @@
     </div>
     <?php echo form_open($this->uri->uri_string(), 'class="form-horizontal"'); ?>
     <div class="reports-header">
-        <ul class="nav nav-pills mode" style="float:left;">
-            <li <?php if($mode == '' || $mode == 'daily') echo 'class="active"'; ?>>
-                <a href="javascript:void(0);" class="status" mode="daily">Daily</a>
-            </li>
-            <li <?php if($mode == 'weekly') echo 'class="active"'; ?>>
-                <a href="javascript:void(0);" class="status" mode="weekly">Weekly</a>
-            </li>
-            <li <?php if($mode == 'monthly') echo 'class="active"'; ?>>
-                <a href="javascript:void(0);" class="status" mode="monthly">Monthly</a>
-            </li>
-        </ul>
-        <input type="hidden" id="mode" name="mode" value="">
+        <table class="table table-bordered" id="returned-items-table">
+        <tbody>
+            <tr>
+                <td>
+                    <h4 style="float: left;margin: 8px 5px 0 0;">DATE:</h4>
+                    <ul class="nav nav-pills mode" style="float:left;margin-bottom: 0;">
+                        <li <?php if($mode == '' || $mode == 'daily') echo 'class="active"'; ?>>
+                            <a href="javascript:void(0);" class="status" mode="daily">Daily</a>
+                        </li>
+                        <li <?php if($mode == 'weekly') echo 'class="active"'; ?>>
+                            <a href="javascript:void(0);" class="status" mode="weekly">Weekly</a>
+                        </li>
+                        <li <?php if($mode == 'monthly') echo 'class="active"'; ?>>
+                            <a href="javascript:void(0);" class="status" mode="monthly">Monthly</a>
+                        </li>
+                    </ul>
+                    <input type="hidden" id="mode" name="mode" value="<?php echo $mode; ?>">
+                </td>
+                <td>
+                    <h4 style="float: left;margin: 8px 5px 0 0;">CATEGORY:</h4>
+                    <ul class="nav nav-pills category" style="float:left;margin-bottom: 0;">
+                        <li <?php if($category == 'apparatus') echo 'class="active"'; ?>>
+                            <a href="javascript:void(0);" class="category" category="apparatus">Apparatus</a>
+                        </li>
+                        <li <?php if($category == 'chemical') echo 'class="active"'; ?>>
+                            <a href="javascript:void(0);" class="category" category="chemical">Chemical</a>
+                        </li>
+                    </ul>
+                    <input type="hidden" id="category" name="category" value="<?php echo $category; ?>">
+                </td>
+            </tr>
+        </tbody>
+
     </div>
 
     <div class="reports-body">

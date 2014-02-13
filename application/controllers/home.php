@@ -1773,7 +1773,9 @@ class Home extends CI_Controller
     public function reports() {
         $rows = '';
         $this->set_current_user();
-        $mode = $this->input->post('mode');
+        $mode       = $this->input->post('mode');
+        $category   = $this->input->post('category');
+
         if($mode == 'daily') {
             $rows = $this->db->query("SELECT i.`name` AS 'name',
                                 SUM(i.`quantity`) AS 'quantity',
@@ -1783,6 +1785,7 @@ class Home extends CI_Controller
                                 INNER JOIN bf_items i ON i.id = r.`item_id`
                                 WHERE r.created_on >= CURDATE()
                                 AND r.created_on <= CURDATE()
+                                AND category = '".$category."'
                                 GROUP BY r.`item_id`
                                 ORDER BY borrowed_quantity DESC");
         }
@@ -1795,6 +1798,7 @@ class Home extends CI_Controller
                                 INNER JOIN bf_items i ON i.id = r.`item_id`
                                 WHERE r.created_on >= ADDDATE(CURDATE(), INTERVAL 1-DAYOFWEEK(CURDATE()) DAY)
                                 AND r.created_on <= ADDDATE(CURDATE(), INTERVAL 7-DAYOFWEEK(CURDATE()) DAY)
+                                AND category = '".$category."'
                                 GROUP BY r.`item_id`
                                 ORDER BY borrowed_quantity DESC");
         }
@@ -1807,6 +1811,7 @@ class Home extends CI_Controller
                                 INNER JOIN bf_items i ON i.id = r.`item_id`
                                 WHERE r.created_on >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
                                 AND r.created_on <= LAST_DAY(CURDATE())
+                                AND category = '".$category."'
                                 GROUP BY r.`item_id`
                                 ORDER BY borrowed_quantity DESC");
         }
@@ -1815,6 +1820,7 @@ class Home extends CI_Controller
         Assets::add_js(Template::theme_url('js/reports.js'), 'external', true);
         Template::set('rows',$rows);
         Template::set('mode',$mode);
+        Template::set('category',$category);
         Template::set_view('home/reports');
         Template::render();
     }
