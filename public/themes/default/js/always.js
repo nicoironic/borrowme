@@ -30,3 +30,45 @@ function  get_notifications() {
         }
     });
 }
+
+function success_message() {
+    jSuccess(
+        'Successful!',
+        {
+            autoHide : true, // added in v2.0
+            TimeShown : 3000,
+            HorizontalPosition : 'center',
+            VerticalPosition : 'center',
+            onCompleted : function(){ // added in v2.0
+            }
+        }
+    )
+}
+
+function warning_message(message) {
+    jSuccess(
+        'Things to remember:'+message,
+        {
+            autoHide : true, // added in v2.0
+            TimeShown : 3000,
+            HorizontalPosition : 'center',
+            VerticalPosition : 'center',
+            onCompleted : function(){ // added in v2.0
+            }
+        }
+    )
+}
+
+function error_message(message) {
+    jError(
+        'Something is wrong!',
+        {
+            autoHide : true, // added in v2.0
+            TimeShown : 3000,
+            HorizontalPosition : 'center',
+            VerticalPosition : 'center',
+            onCompleted : function(){ // added in v2.0
+            }
+        }
+    )
+}

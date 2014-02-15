@@ -53,8 +53,10 @@ class Home extends CI_Controller
 
         Assets::add_css(array(Template::theme_url('css/jqueryui.bootstrap.css')));
         Assets::add_css(array(Template::theme_url('css/always.css')));
+        Assets::add_css(array(Template::theme_url('js/jNotify-master/jquery/jNotify.jquery.css')));
         Assets::add_js('codeigniter-csrf.js');
         Assets::add_js(Template::theme_url('js/jquery-ui-1.8.13.min.js'), 'external', true);
+        Assets::add_js(Template::theme_url('js/jNotify-master/jquery/jNotify.jquery.js'), 'external', true);
         Assets::add_js(Template::theme_url('js/always.js'), 'external', true);
 	}
 
@@ -1864,6 +1866,158 @@ class Home extends CI_Controller
         $body .= '</tbody></table></td></tr>';
 
         die($body);
+    }
+
+    public function sales_order() {
+        $this->load->model('sales_order/sales_order_model', null, true);
+
+        $this->set_current_user();
+
+        Assets::add_css(array(Template::theme_url('css/docs.css')));
+        Assets::add_css(array(Template::theme_url('css/sales-order.css')));
+        Assets::add_js(Template::theme_url('js/sales-order.js'), 'external', true);
+
+        Template::set('rows',$rows = $this->sales_order_model->find_all());
+        Template::set_view('home/sales-order');
+        Template::render();
+    }
+
+    public function sales_order_record() {
+        $this->load->model('sales_order/sales_order_model', null, true);
+
+        $this->set_current_user();
+
+        $id = $this->uri->segment(2);
+
+
+        $record                     = $this->sales_order_model->find($id);
+
+        if(empty($record))
+            $record                 = new stdClass();
+
+        $record->id                 = isset($record->id) ? $record->id : 0;
+        $record->supplier           = isset($record->supplier) ? $record->supplier : '';
+        $record->date_received      = isset($record->date_received) ? $record->date_received : '';
+        $record->invoice_no         = isset($record->invoice_no) ? $record->invoice_no : '';
+        $record->date_invoice       = isset($record->date_invoice) ? $record->date_invoice : '';
+        $record->receiving_dept     = isset($record->receiving_dept) ? $record->receiving_dept : '';
+        $record->received_by        = isset($record->received_by) ? $record->received_by : 0;
+        $record->noted_by           = isset($record->noted_by) ? $record->noted_by : '';
+        $record->ris_no             = isset($record->ris_no) ? $record->ris_no : '';
+        $record->po_no              = isset($record->po_no) ? $record->po_no : '';
+        $record->jor_no             = isset($record->jor_no) ? $record->jor_no : '';
+
+        Template::set('record',$record);
+
+        $details = $this->db->get_where('bf_sales_order_details', array('sales_order_id' => $id));
+        Template::set('details',$details);
+
+        if(isset($_POST['submit'])) {
+            $data = array(
+                'invoice_no'            => $this->input->post('sales_order_invoice_no'),
+                'supplier'              => $this->input->post('sales_order_supplier'),
+                'ris_no'                => $this->input->post('sales_order_ris_no'),
+                'po_no'                 => $this->input->post('sales_order_po_no'),
+                'jor_no'                => $this->input->post('sales_order_jor_no'),
+                'date_received'         => $this->input->post('sales_order_date_received'),
+                'date_invoice'          => $this->input->post('sales_order_date_invoice'),
+                'receiving_dept'        => $this->input->post('sales_order_receiving_dept'),
+                'received_by'           => $this->input->post('sales_order_received_by'),
+                'noted_by'              => $this->input->post('sales_order_noted_by'),
+                'created_on'            => date('Y-m-d H:i:s'),
+                'modified_on'           => date('Y-m-d H:i:s')
+            );
+
+            $this->db->insert('bf_sales_order', $data);
+            $newid = $this->db->insert_id();
+
+            redirect('/sales-order-record/'.$newid);
+        }
+
+        Assets::add_css(array(Template::theme_url('css/docs.css')));
+        Assets::add_css(array(Template::theme_url('css/sales-order.css')));
+        Assets::add_js(Template::theme_url('js/jquery-ui-1.10.4.auto-complete.js'), 'external', true);
+        Assets::add_js(Template::theme_url('js/sales-order.js'), 'external', true);
+
+        Template::set('items',$items = $this->items_model->find_all());
+        Template::set('labincharge',$lab = $this->lab_incharge_model->find_all());
+        Template::set_view('home/sales-order-record');
+        Template::render();
+    }
+
+    public function sales_order_details() {
+        $items = $this->input->post('items');
+
+        $data = array(
+            'invoice_no'            => $this->input->post('sales_order_invoice_no'),
+            'supplier'              => $this->input->post('sales_order_supplier'),
+            'ris_no'                => $this->input->post('sales_order_ris_no'),
+            'po_no'                 => $this->input->post('sales_order_po_no'),
+            'jor_no'                => $this->input->post('sales_order_jor_no'),
+            'date_received'         => $this->input->post('sales_order_date_received'),
+            'date_invoice'          => $this->input->post('sales_order_date_invoice'),
+            'receiving_dept'        => $this->input->post('sales_order_receiving_dept'),
+            'received_by'           => $this->input->post('sales_order_received_by'),
+            'noted_by'              => $this->input->post('sales_order_noted_by'),
+        );
+        $this->db->where('id', $this->input->post('id'));
+        $this->db->update('bf_sales_order', $data);
+
+        $this->db->where('sales_order_id', $this->input->post('id'));
+        $this->db->delete('bf_sales_order_details');
+
+        if(!empty($items)) {
+            for($x=0; $x<count($items); $x++) {
+                $data = array(
+                    'sales_order_id'    => $this->input->post('id'),
+                    'item_id'           => $items[$x]['item_id'],
+                    'quantity'          => $items[$x]['quantity'],
+                    'unit_cost'         => $items[$x]['unit_cost'],
+                    'total'             => $items[$x]['total']
+                );
+                $this->db->insert('bf_sales_order_details', $data);
+            }
+        }
+
+        die('success');
+    }
+
+    public function delete_sales_order() {
+        $this->db->where('id', $this->input->post('id'));
+        $this->db->delete('bf_sales_order');
+
+        $this->db->where('sales_order_id', $this->input->post('id'));
+        $this->db->delete('bf_sales_order_details');
+
+        die('success');
+    }
+
+    public function purchase_order() {
+        $this->set_current_user();
+
+        Assets::add_css(array(Template::theme_url('css/docs.css')));
+        Assets::add_css(array(Template::theme_url('css/purchase-order.css')));
+        Assets::add_js(Template::theme_url('js/purchase-order.js'), 'external', true);
+
+        $rows = '';
+        Template::set('rows',$rows);
+        Template::set_view('home/purchase-order');
+        Template::render();
+    }
+
+    public function purchase_order_record() {
+        $this->set_current_user();
+
+        $id = $this->uri->segment(3);
+
+        Assets::add_css(array(Template::theme_url('css/docs.css')));
+        Assets::add_css(array(Template::theme_url('css/purchase-order.css')));
+        Assets::add_js(Template::theme_url('js/purchase-order.js'), 'external', true);
+
+        $rows = '';
+        Template::set('rows',$rows);
+        Template::set_view('home/purchase-order-record');
+        Template::render();
     }
 
 	//--------------------------------------------------------------------

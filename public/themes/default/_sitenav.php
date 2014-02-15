@@ -15,7 +15,7 @@
             <li <?php if($last == 'notifications') echo 'class="active"'; ?> id="notifications"><a href="<?php echo site_url('/notifications') ?>">Notifications</a></li>
             <li <?php if($last == 'transactions') echo 'class="active"'; ?>><a href="<?php echo site_url('/transactions') ?>">Transactions</a></li>
             <?php if($current_user->role_desc != 'student') { ?>
-                <li class="dropdown <?php if($last == 'sales-order' || $last == 'purchase-order' || $last == 'reports') echo 'active'; ?>">
+                <li class="dropdown <?php if($last == 'sales-order' || $last == '0' || $last == 'purchase-order' || $last == '0' || $last == 'reports') echo 'active'; ?>">
                     <a id="dropdown-custom" href="<?php echo site_url('/admin') ?>" class="dropdown-toggle" title="Inventory" data-toggle="dropdown" data-id="inventory_menu">Inventory</a>
                     <ul class="dropdown-menu" id="inventory_menu">
                         <li><a href="<?php echo site_url('/sales-order') ?>" class="">Sales Order</a>

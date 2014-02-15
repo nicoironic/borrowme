@@ -41,3 +41,9 @@ div.processing img {
 .jumbotron {
     margin: 0 !important;
 }
+.width-auto {
+    width: auto !important;
+}
+.no-padding {
+    padding: 0 !important;
+}
