@@ -2,14 +2,21 @@
  * Created by NPag-ong on 1/25/14.
  */
 $( document ).ready(function() {
-    $('ul.mode li a.status').click(function() {
-        $('input#mode').val($(this).attr('mode'));
-
-        $(this).parents('form').submit();
-    });
-    $('ul.category li a.category').click(function() {
-        $('input#category').val($(this).attr('category'));
-
-        $(this).parents('form').submit();
-    });
+    init_others();
 });
+
+function init_others() {
+    $('select#purchase_order_sales_order_id').change(function() {
+        $('input#purchase_order_supplier').val($(this).find('option:selected').attr('thissupplier'));
+    });
+
+    $('button.btn-cancel').click(function() {
+        var newURL = window.location.protocol + "//" + window.location.host + "/purchase-order";
+        window.location.replace(newURL);
+    });
+
+    $('button.btn-new').click(function() {
+        var newURL = window.location.protocol + "//" + window.location.host + "/purchase-order-record/0";
+        window.location.replace(newURL);
+    });
+}

@@ -1,83 +1,159 @@
+<?php
+$sum                        = 0;
+?>
 <section id="profile">
-    <div class="container-fluid">
-        <h3 class="page-header" style="text-align: left;">Your reports</h3>
+    <div class="container-fluid no-padding">
+        <h3 class="page-header" style="text-align: left;">Purchase Order #<span id="sales-order-no"><?php echo $record->id; ?></span></h3>
+        <input type="hidden" id="purchase_order_id" name="purchase_order_id" value="<?php echo $record->id; ?>">
     </div>
-    <?php echo form_open($this->uri->uri_string(), 'class="form-horizontal"'); ?>
-    <div class="reports-header">
-        <table class="table table-bordered" id="returned-items-table">
-        <tbody>
-            <tr>
-                <td>
-                    <h4 style="float: left;margin: 8px 5px 0 0;">DATE:</h4>
-                    <ul class="nav nav-pills mode" style="float:left;margin-bottom: 0;">
-                        <li <?php if($mode == '' || $mode == 'daily') echo 'class="active"'; ?>>
-                            <a href="javascript:void(0);" class="status" mode="daily">Daily</a>
-                        </li>
-                        <li <?php if($mode == 'weekly') echo 'class="active"'; ?>>
-                            <a href="javascript:void(0);" class="status" mode="weekly">Weekly</a>
-                        </li>
-                        <li <?php if($mode == 'monthly') echo 'class="active"'; ?>>
-                            <a href="javascript:void(0);" class="status" mode="monthly">Monthly</a>
-                        </li>
-                    </ul>
-                    <input type="hidden" id="mode" name="mode" value="<?php echo $mode; ?>">
-                </td>
-                <td>
-                    <h4 style="float: left;margin: 8px 5px 0 0;">CATEGORY:</h4>
-                    <ul class="nav nav-pills category" style="float:left;margin-bottom: 0;">
-                        <li <?php if($category == 'apparatus') echo 'class="active"'; ?>>
-                            <a href="javascript:void(0);" class="category" category="apparatus">Apparatus</a>
-                        </li>
-                        <li <?php if($category == 'chemical') echo 'class="active"'; ?>>
-                            <a href="javascript:void(0);" class="category" category="chemical">Chemical</a>
-                        </li>
-                    </ul>
-                    <input type="hidden" id="category" name="category" value="<?php echo $category; ?>">
-                </td>
-            </tr>
-        </tbody>
+    <?php echo form_open($this->uri->uri_string(), 'class="form-inline"'); ?>
+    <div class="header">
+        <div class="row-fluid">
+            <div class="span6">
+                <label style="margin-right: 24px !important;">PO No:</label>
+                <input class="span8" type="text" id="purchase_order_purchase_order_no" name="purchase_order_purchase_order_no" value="<?php echo $record->purchase_order_no; ?>">
+            </div>
+            <div class="span6">
+                <label style="margin-right: 58px;">Terms:</label>
+                <select class="span9" id="purchase_order_terms" name="purchase_order_terms">
+                    <option value="15days" <?php echo $record->terms == '15days' ? 'selected' : ''; ?>>15 days</option>
+                    <option value="30days" <?php echo $record->terms == '30days' ? 'selected' : ''; ?>>30 days</option>
+                </select>
+            </div>
+        </div>
+        <div class="row-fluid show-grid" style="margin-bottom:10px;">
+            <div class="span6">
+                <label>Invoice No:</label>
+                <select class="span8" id="purchase_order_sales_order_id" name="purchase_order_sales_order_id">
+                    <option value="0">SELECT INVOICE</option>
+                    <?php
+                    foreach($sales_order as $row) {
+                        $selected = $row->id == $record->sales_order_id ? 'selected' : '';
+                        echo '<option value="'.$row->id.'" '.$selected.' thissupplier="'.$row->supplier.'">'.$row->invoice_no.'</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="span6">
+                <label>Contact Person:</label>
+                <input class="span9" type="text" id="purchase_order_contact_person" name="purchase_order_contact_person" value="<?php echo $record->contact_person; ?>">
+            </div>
+        </div>
+        <div class="row-fluid show-grid">
+            <div class="span6">
+                <label style="margin-right:13px;">Supplier:</label>
+                <input class="span8" type="text" id="purchase_order_supplier" name="purchase_order_supplier" value="<?php echo $record->supplier; ?>">
+            </div>
+            <div class="span6">
+                <label style="margin-right: 46px;">Address:</label>
+                <textarea class="span9" id="purchase_order_address" name="purchase_order_address"><?php echo $record->address; ?></textarea>
+            </div>
+        </div>
 
     </div>
 
-    <div class="reports-body">
-        <table class="table table-bordered" id="returned-items-table">
-            <thead>
-            <?php if($category == 'apparatus') { ?>
-            <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Borrowed Quantity</th>
-                <th>Returned Quantity</th>
-            </tr>
-            <?php } else { ?>
-            <tr>
-                <th>Item</th>
-                <th>Overall Weight Purchased</th>
-                <th>Overall Cost</th>
-            </tr>
-            <?php } ?>
-            </thead>
-            <tbody id="dynamic-tbody">
-            <?php
-            if(!empty($rows)):
-            foreach($rows->result() as $row) { ?>
-                <?php if($category == 'apparatus') { ?>
-                    <tr>
-                        <td><?php echo $row->name; ?></td>
-                        <td class="align-right"><?php echo $row->quantity; ?></td>
-                        <td class="align-right"><?php echo $row->borrowed_quantity; ?></td>
-                        <td class="align-right"><?php echo $row->returned_quantity; ?></td>
-                    </tr>
+    <div class="body">
+        <div class="row-fluid table-area">
+            <div class="span12">
+                <?php if($record->id == 0) { ?>
+                    <div class="row show-grid-custom" style="margin-left: 6%;">
+                        <div class="span11" ><strong>Please save your record first before adding some items...</strong></div>
+                    </div>
                 <?php } else { ?>
-                    <tr>
-                        <td><?php echo $row->name; ?></td>
-                        <td class="align-right"><?php echo $row->total_quantity.' '.$row->unit_of_measure; ?></td>
-                        <td class="align-right"><?php echo $row->total_cost; ?></td>
-                    </tr>
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                        <th width="5%">&nbsp;</th>
+                        <th width="10%">QTY</th>
+                        <th width="10%">UNIT</th>
+                        <th width="55%">DESCRIPTION</th>
+                        <th width="10%">UNIT COST</th>
+                        <th width="10%">AMOUNT</th>
+                        </thead>
+                        <tbody>
+                        <?php
+                        if ($details->num_rows() > 0) {
+                            foreach ($details->result() as $row) {
+                                $item = $this->items_model->find($row->item_id);
+
+                                $sum += $row->total;
+                                ?>
+                                <tr class="tr-detail">
+                                    <td><button type="button" class="btn btn-danger btn-delete"><i class="icon-minus icon-white"></i></button></td>
+                                    <td class="align-right"><span class="quantity"><?php echo $row->quantity; ?></span></td>
+                                    <td><span class="unit_of_measure"><?php echo $item->unit_of_measure; ?></span></td>
+                                    <td><span class="item"><?php echo $item->name; ?></span><input type="hidden" class="item-id" value="<?php echo $item->id; ?>"></td>
+                                    <td class="align-right"><span class="unit_cost"><?php echo $row->unit_cost; ?></span></td>
+                                    <td class="align-right"><span class="total"><?php echo $row->total; ?></span></td>
+                                </tr>
+                            <?php
+                            }
+                        }
+                        ?>
+                        <tr>
+                            <td><button type="button" class="btn btn-info btn-add"><i class="icon-plus icon-white"></i></button></td>
+                            <td><input type="text" class="purchase_order_details_qty width-auto text-right"></td>
+                            <td><span class="purchase_order_details_unit">&nbsp;</span></td>
+                            <td>
+                                <select class="purchase_order_details_item_id span11">
+                                    <?php
+                                    foreach($items as $row) {
+                                        echo '<option value="'.$row->id.'" thisunit="'.$row->unit_of_measure.'">'.$row->name.'</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </td>
+                            <td><input type="text" class="purchase_order_details_unit_cost width-auto text-right"></td>
+                            <td class="align-right"><span class="purchase_order_details_total">&nbsp;</span></td>
+                        </tr>
+                        <tr>
+                            <td colspan="5">
+                                <strong>TOTAL:</strong>
+                            </td>
+                            <td class="align-right">
+                                <span id="overall" style="font-weight: bold;"><?php echo $sum;?></span>
+                        </tr>
+                        </tbody>
+                    </table>
                 <?php } ?>
-            <?php } endif; ?>
-            </tbody>
-        </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="row-fluid" style="margin-top:20px; margin-bottom:10px;">
+            <div class="span6">
+                <label style="margin-right:10px;">Ordered By:</label>
+                <input type="text" class="span8" id="purchase_order_ordered_by" name="purchase_order_ordered_by" value="<?php echo $record->ordered_by; ?>">
+            </div>
+            <div class="span6">
+                <label style="margin-right:5px;">Requested By:</label>
+                <input type="text" class="span9" id="purchase_order_requested_by" name="purchase_order_requested_by" value="<?php echo $record->requested_by; ?>">
+            </div>
+        </div>
+        <div class="row-fluid show-grid">
+            <div class="span6">
+                <label style="margin-right:4px;">Received By:</label>
+                <input type="text" class="span8" id="purchase_order_received_by" name="purchase_order_received_by" value="<?php echo $record->received_by; ?>">
+            </div>
+            <div class="span6">
+                <label style="margin-right:53px;">PO No:</label>
+                <select class="span9" id="purchase_order_status" name="purchase_order_status">
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="row-fluid show-grid">
+            <div class="span12 align-right">
+                <div class="btn-group">
+                    <button class="btn btn-success" <?php echo $record->id == 0 ? 'type="submit" value="submit"' : 'type="button"'; ?> name="submit" id="submit">Save</button>
+                    <button class="btn btn-warning btn-cancel" type="button">Cancel</button>
+                    <button class="btn btn-danger btn-delete-record" type="button">Delete</button>
+                </div>
+            </div>
+        </div>
     </div>
     <?php form_close(); ?>
 </section>

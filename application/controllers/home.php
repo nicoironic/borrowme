@@ -1993,29 +1993,79 @@ class Home extends CI_Controller
     }
 
     public function purchase_order() {
+        $this->load->model('purchase_order/purchase_order_model', null, true);
+        $this->load->model('sales_order/sales_order_model', null, true);
+
         $this->set_current_user();
 
         Assets::add_css(array(Template::theme_url('css/docs.css')));
         Assets::add_css(array(Template::theme_url('css/purchase-order.css')));
         Assets::add_js(Template::theme_url('js/purchase-order.js'), 'external', true);
 
-        $rows = '';
-        Template::set('rows',$rows);
+        Template::set('rows',$rows = $this->purchase_order_model->find_all());
         Template::set_view('home/purchase-order');
         Template::render();
     }
 
     public function purchase_order_record() {
+        $this->load->model('purchase_order/purchase_order_model', null, true);
+        $this->load->model('sales_order/sales_order_model', null, true);
+
         $this->set_current_user();
 
-        $id = $this->uri->segment(3);
+        $id = $this->uri->segment(2);
+
+
+        $record                     = $this->purchase_order_model->find($id);
+
+        if(empty($record))
+            $record                 = new stdClass();
+
+        $record->id                 = isset($record->id) ? $record->id : 0;
+        $record->purchase_order_no  = isset($record->purchase_order_no) ? $record->purchase_order_no : '';
+        $record->sales_order_id     = isset($record->sales_order_id) ? $record->sales_order_id : 0;
+        $record->supplier           = isset($record->supplier) ? $record->supplier : '';
+        $record->address            = isset($record->address) ? $record->address : '';
+        $record->terms              = isset($record->terms) ? $record->terms : '';
+        $record->contact_person     = isset($record->contact_person) ? $record->contact_person : '';
+        $record->ordered_by         = isset($record->ordered_by) ? $record->ordered_by : '';
+        $record->requested_by       = isset($record->requested_by) ? $record->requested_by : '';
+        $record->received_by        = isset($record->received_by) ? $record->received_by : '';
+        $record->status             = isset($record->status) ? $record->status : '';
+
+        Template::set('record',$record);
+
+        $details = $this->db->get_where('bf_purchase_order_details', array('purchase_order_id' => $id));
+        Template::set('details',$details);
+
+        if(isset($_POST['submit'])) {
+            $data = array(
+                'purchase_order_no' => $this->input->post('purchase_order_purchase_order_no'),
+                'sales_order_id'    => $this->input->post('purchase_order_sales_order_id'),
+                'supplier'          => $this->input->post('purchase_order_supplier'),
+                'address'           => $this->input->post('purchase_order_address'),
+                'terms'             => $this->input->post('purchase_order_terms'),
+                'contact_person'    => $this->input->post('purchase_order_contact_person'),
+                'ordered_by'        => $this->input->post('purchase_order_ordered_by'),
+                'requested_by'      => $this->input->post('purchase_order_requested_by'),
+                'received_by'       => $this->input->post('purchase_order_received_by'),
+                'status'            => $this->input->post('purchase_order_status'),
+                'created_on'        => date('Y-m-d H:i:s'),
+                'modified_on'       => date('Y-m-d H:i:s')
+            );
+
+            $this->db->insert('bf_purchase_order', $data);
+            $newid = $this->db->insert_id();
+
+            redirect('/purchase-order-record/'.$newid);
+        }
 
         Assets::add_css(array(Template::theme_url('css/docs.css')));
         Assets::add_css(array(Template::theme_url('css/purchase-order.css')));
         Assets::add_js(Template::theme_url('js/purchase-order.js'), 'external', true);
 
-        $rows = '';
-        Template::set('rows',$rows);
+        Template::set('items',$items = $this->items_model->find_all());
+        Template::set('sales_order',$lab = $this->sales_order_model->find_all());
         Template::set_view('home/purchase-order-record');
         Template::render();
     }

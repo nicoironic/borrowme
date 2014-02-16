@@ -4,7 +4,7 @@
 $( document ).ready(function() {
     init_datepickers();
     init_table_features();
-    init_other();
+    init_others();
 });
 
 function init_table_features() {
@@ -91,7 +91,7 @@ function init_datepickers() {
     });
 }
 
-function init_other() {
+function init_others() {
     $('button#submit').click(function() {
         if($(this).attr('type') == 'button') {
             var items = [];
