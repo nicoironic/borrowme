@@ -42,15 +42,14 @@ $route['default_controller'] = "home";
 $route['404_override'] = '';
 
 // Items
-$route['add-item']                      = 'home/add_item';
-$route['return-item']                   = 'home/return_item';
-$route['transactions']                  = 'home/transactions';
-$route['notifications']                 = 'home/notifications';
-$route['reports']                       = 'home/reports';
-$route['sales-order']                   = 'home/sales_order';
-$route['purchase-order']                = 'home/purchase_order';
-$route['sales-order-record/(:num)']     = 'home/sales_order_record/$1';
-$route['purchase-order-record/(:num)']  = 'home/purchase_order_record/$1';
+$route['add-item']                      = 'items/add_item';
+$route['transactions']                  = 'transactions';
+$route['notifications']                 = 'notifications';
+$route['reports']                       = 'reports';
+$route['sales-order']                   = 'sales_order';
+$route['sales-order-record/(:num)']     = 'sales_order/sales_order_record/$1';
+$route['purchase-order']                = 'purchase_order';
+$route['purchase-order-record/(:num)']  = 'purchase_order/purchase_order_record/$1';
 
 // Authentication
 $route[LOGIN_URL]				= 'users/login';

@@ -109,7 +109,7 @@ function init_others() {
 
             $.ajax({
                 type : "post",
-                url : '/home/sales_order_details',
+                url : '/sales_order/sales_order_details',
                 data: {
                     "ci_csrf_token"	                : ci_csrf_token(),
                     "id"                            : $('input#sales_order_id').val(),
@@ -139,23 +139,6 @@ function init_others() {
     $('button.btn-cancel').click(function() {
         var newURL = window.location.protocol + "//" + window.location.host + "/sales-order";
         window.location.replace(newURL);
-    });
-
-    $('button.btn-delete-record').click(function() {
-        $.ajax({
-            type : "post",
-            url : '/home/delete_sales_order',
-            data: {
-                "ci_csrf_token"	                : ci_csrf_token(),
-                "id"                            : $('input#sales_order_id').val()
-            },
-            success: function(result,status,xhr) {
-                if(result == 'success') {
-                    var newURL = window.location.protocol + "//" + window.location.host + "/sales-order";
-                    window.location.replace(newURL);
-                }
-            }
-        });
     });
 
     $('button.btn-new').click(function() {

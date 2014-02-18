@@ -1,12 +1,8 @@
-div.left-header {
-
-}
 div.left-header h3 {
-    float: left;
-    margin-top: 0;
+    text-align: left;
 }
-div.left-header div.input-prepend {
-    float: right;
+div.left-header div.search-box {
+    text-align: right;
 }
 div.items-container {
     position: relative;
@@ -21,6 +17,7 @@ div.right-content {
     padding-right: 0;
     position: relative;
     height: auto;
+    margin-top: 10.1%;
 }
 div.pbox-row {
     margin-bottom: 40px;

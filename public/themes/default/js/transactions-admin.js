@@ -18,7 +18,7 @@ function item_list(mode,page,search) {
     $('div.processing').css('visibility','visible');
     $.ajax({
         type : "post",
-        url : '/home/transaction_list_ajax',
+        url : '/transactions/transaction_list_ajax',
         data: {
             "ci_csrf_token"	: ci_csrf_token(),
             "type"          : mode,
@@ -52,7 +52,7 @@ function events() {
             var tr = $(this).parents('tr');
             $.ajax({
                 type : "post",
-                url : '/home/inner_table_ajax',
+                url : '/transactions/inner_table_ajax',
                 data: {
                     "ci_csrf_token"	: ci_csrf_token(),
                     "date"          : $(this).attr('value'),
@@ -88,7 +88,7 @@ function button_events() {
     $('button.btn-pending').unbind('click').click(function() {
         $.ajax({
             type : "post",
-            url : '/home/change_status_ajax',
+            url : '/transactions/change_status_ajax',
             data: {
                 "ci_csrf_token"	: ci_csrf_token(),
                 "date"          : $(this).attr('thisdate'),
@@ -124,7 +124,7 @@ function button_events() {
     $('button.btn-approved').unbind('click').click(function() {
         $.ajax({
             type : "post",
-            url : '/home/change_status_ajax',
+            url : '/transactions/change_status_ajax',
             data: {
                 "ci_csrf_token"	: ci_csrf_token(),
                 "date"          : $(this).attr('thisdate'),
@@ -192,7 +192,7 @@ function button_events() {
         if(okay === true) {
             $.ajax({
                 type : "post",
-                url : '/home/change_status_ajax',
+                url : '/transactions/change_status_ajax',
                 data: {
                     "ci_csrf_token"	: ci_csrf_token(),
                     "date"          : $(this).attr('thisdate'),
@@ -284,7 +284,7 @@ function button_events() {
         if(okay === true) {
             $.ajax({
                 type : "post",
-                url : '/home/change_status_ajax',
+                url : '/transactions/change_status_ajax',
                 data: {
                     "ci_csrf_token"	: ci_csrf_token(),
                     "date"          : $(this).attr('thisdate'),
@@ -333,7 +333,7 @@ function button_events() {
         else {
             $.ajax({
                 type : "post",
-                url : '/home/lacking_details',
+                url : '/transactions/lacking_details',
                 data: {
                     "ci_csrf_token"	: ci_csrf_token(),
                     "id"          : $(this).attr('thisid')

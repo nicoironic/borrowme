@@ -17,7 +17,7 @@ function  get_notifications() {
     $.ajax({
         dataType : "json",
         type : "post",
-        url : '/home/get_notifications',
+        url : '/notifications/get_notifications',
         data: {
             "ci_csrf_token"	: ci_csrf_token()
         },

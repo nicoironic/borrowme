@@ -18,11 +18,11 @@ function pagination() {
 }
 
 function events() {
-    $('a.date-link').click(function() {
+    $('a.date-link').unbind('click').click(function() {
         var date = $(this).text();
         $.ajax({
             type : "post",
-            url : '/home/generate_table_ajax',
+            url : '/transactions/generate_table_ajax',
             data: {
                 "ci_csrf_token"	: ci_csrf_token(),
                 "date"          : $(this).attr('value'),

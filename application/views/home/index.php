@@ -8,10 +8,25 @@
                     </div>
                     <div class="left-header">
                         <h3 class="green-color">Items</h3>
-                        <div class="input-prepend">
-                            <span class="add-on"><i class="icon-search"></i></span>
-                            <input class="span10" id="search-products" type="text" placeholder="Search" name="search-products-name">
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <ul class="nav nav-pills type" style="float:left;">
+                                    <li class="active">
+                                        <a href="javascript:void(0);" class="type" status="apparatus">Apparatus</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="type" status="chemical">Chemical</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="span6 search-box">
+                                <div class="input-prepend">
+                                    <span class="add-on"><i class="icon-search"></i></span>
+                                    <input class="span10" id="search-products" type="text" placeholder="Search" name="search-products-name">
+                                </div>
+                            </div>
                         </div>
+
                     </div>
 
                     <div class="mini-layout list-container">
@@ -39,7 +54,7 @@
                         </div>
 
                         <div class="summary-checkout">
-                            <button type="button" class="btn btn-primary" id="checkout">Checkout these items</button>
+                            <button type="button" class="btn btn-primary" id="checkout">Submit Request</button>
                         </div>
                     </div>
                 </div>

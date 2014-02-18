@@ -14,11 +14,11 @@ $( document ).ready(function() {
     user_id = $('input#user_id').val();
     role_id = $('input#role_id').val();
 
-    item_list();
+    item_list('','apparatus');
     other_events();
 });
 
-function item_list(search) {
+function item_list(search,type) {
     $('div.preloader').show();
 
     $.ajax({
@@ -27,7 +27,8 @@ function item_list(search) {
         data: {
             "ci_csrf_token"	: ci_csrf_token(),
             "page"          : 0,
-            "search"        : search
+            "search"        : search,
+            "type"          : type
         },
         success: function(result,status,xhr) {
             $('div.list-container').html(result);
@@ -75,10 +76,10 @@ function item_events() {
             var unit    = $(parent).find('span.actual-quantity').attr('actual-unit');
 
             if(parseFloat(price) > 0) {
-                var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1" readonly/> x 10'+unit+'</div></div>';
+                var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1"/> x 10'+unit+'</div></div>';
             }
             else {
-                var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1" readonly/></div></div>';
+                var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1" /></div></div>';
 
             }
 
@@ -97,8 +98,27 @@ function item_events() {
 }
 
 function other_events() {
+    $('a.type').unbind('click').click(function() {
+        $(this).parents('ul').find('li').each(function() {
+            $(this).removeClass('active');
+        });
+        $(this).parent().addClass('active');
+
+        $('div.summary-list div.summary-item').each(function() {
+           $(this).find('div.close').click();
+        });
+
+        if($(this).attr('status') == 'apparatus')
+            $('button#checkout').text('Submit Request');
+        else
+            $('button#checkout').text('Checkout Items');
+
+        item_list('',$(this).attr('status'));
+    });
+
+
     $( "input#search-products" ).keyup(function() {
-        item_list($(this).val());
+        item_list($(this).val(),$('ul.type li.active a').attr('status'));
     });
 
     $('button#checkout').click(function() {
@@ -130,7 +150,8 @@ function other_events() {
                 url         : '/home/items_checkout_ajax',
                 data        : {
                     "ci_csrf_token"	: ci_csrf_token(),
-                    "items"          : items
+                    "type"          : $('ul.type li.active a').attr('status'),
+                    "items"         : items
                 },
                 error       : function(result) {
                 },
