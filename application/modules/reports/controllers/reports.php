@@ -38,6 +38,7 @@ class reports extends Front_Controller
 
         Assets::add_css(array(Template::theme_url('css/jqueryui.bootstrap.css')));
         Assets::add_css(array(Template::theme_url('css/always.css')));
+        Assets::add_css(array(Template::theme_url('css/reports.css')));
         Assets::add_css(array(Template::theme_url('js/jNotify-master/jquery/jNotify.jquery.css')));
         Assets::add_js('codeigniter-csrf.js');
         Assets::add_js(Template::theme_url('js/jquery-ui-1.8.13.min.js'), 'external', true);
@@ -67,65 +68,120 @@ class reports extends Front_Controller
         if($user->role_desc == 'student')
             redirect('/');
 
-        $mode       = $this->input->post('mode');
-        $category   = $this->input->post('category');
-
-        if($mode == 'daily') {
-            $rows = $this->db->query("SELECT i.`name` AS 'name',
-                                SUM(i.`quantity`) AS 'quantity',
-                                SUM(r.`quantity`) AS 'borrowed_quantity',
-                                SUM(r.`return_qty`) AS 'returned_quantity',
-                                SUM(r.`quantity`) * 10 AS 'total_quantity',
-                                SUM(r.`return_qty`) * i.price AS 'total_cost',
-                                unit_of_measure
-                                FROM bf_returned_items r
-                                INNER JOIN bf_items i ON i.id = r.`item_id`
-                                WHERE r.created_on >= CURDATE()
-                                AND r.created_on <= CURDATE()
-                                AND category = '".$category."'
-                                GROUP BY r.`item_id`
-                                ORDER BY borrowed_quantity DESC");
-        }
-        else if($mode == 'weekly') {
-            $rows = $this->db->query("SELECT i.`name` AS 'name',
-                                SUM(i.`quantity`) AS 'quantity',
-                                SUM(r.`quantity`) AS 'borrowed_quantity',
-                                SUM(r.`return_qty`) AS 'returned_quantity',
-                                SUM(r.`quantity`) * 10 AS 'total_quantity',
-                                SUM(r.`return_qty`) * i.price AS 'total_cost',
-                                unit_of_measure
-                                FROM bf_returned_items r
-                                INNER JOIN bf_items i ON i.id = r.`item_id`
-                                WHERE r.created_on >= ADDDATE(CURDATE(), INTERVAL 1-DAYOFWEEK(CURDATE()) DAY)
-                                AND r.created_on <= ADDDATE(CURDATE(), INTERVAL 7-DAYOFWEEK(CURDATE()) DAY)
-                                AND category = '".$category."'
-                                GROUP BY r.`item_id`
-                                ORDER BY borrowed_quantity DESC");
-        }
-        else if($mode == 'monthly') {
-            $rows = $this->db->query("SELECT i.`name` AS 'name',
-                                SUM(i.`quantity`) AS 'quantity',
-                                SUM(r.`quantity`) AS 'borrowed_quantity',
-                                SUM(r.`return_qty`) AS 'returned_quantity',
-                                SUM(r.`quantity`) * 10 AS 'total_quantity',
-                                SUM(r.`return_qty`) * i.price AS 'total_cost',
-                                unit_of_measure
-                                FROM bf_returned_items r
-                                INNER JOIN bf_items i ON i.id = r.`item_id`
-                                WHERE r.created_on >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
-                                AND r.created_on <= LAST_DAY(CURDATE())
-                                AND category = '".$category."'
-                                GROUP BY r.`item_id`
-                                ORDER BY borrowed_quantity DESC");
-        }
-
-
         Assets::add_js(Template::theme_url('js/reports.js'), 'external', true);
-        Template::set('rows',$rows);
-        Template::set('mode',$mode);
-        Template::set('category',$category);
         Template::set_view('reports/reports');
         Template::render();
+    }
+
+    public function report_list() {
+        $body       = '';
+        $where      = '';
+
+        $start      = $this->input->post('start_date');
+        $end        = $this->input->post('end_date');
+        $search     = $this->input->post('search');
+        $category   = $this->input->post('category');
+
+        if($start != '') {
+            $where .= " AND r.created_on >= '".$start."'";
+            if($end != '')
+                $where .= " AND r.created_on <= '".$end."'";
+        }
+        else if($end != '') {
+            $where .= " AND r.created_on <= '".$end."'";
+        }
+
+        if($search != '') {
+            $where .= " AND i.name like '%".$search."%'";
+        }
+
+        if($category != '') {
+            $where .= " AND category = '".$category."'";
+        }
+
+        $rows = $this->db->query("SELECT i.`name` AS 'name',
+                                i.`quantity` AS 'quantity',
+                                SUM(r.`quantity`) AS 'borrowed_quantity',
+                                SUM(r.`return_qty`) AS 'returned_quantity',
+                                SUM(r.`quantity`) * 10 AS 'total_quantity',
+                                SUM(r.`return_qty`) * i.price AS 'total_cost',
+                                unit_of_measure
+                                FROM bf_returned_items r
+                                INNER JOIN bf_items i ON i.id = r.`item_id`
+                                WHERE 1=1
+                                ".$where."
+                                GROUP BY r.`item_id`
+                                ORDER BY borrowed_quantity DESC");
+
+        if($category == '') {
+            $body .= '<table class="table table-bordered" id="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Borrowed Quantity</th>
+                                <th>Returned Quantity</th>
+                                <th>Overall Weight Purchased</th>
+                                <th>Overall Cost</th>
+                            </tr>
+                        </thead>';
+        }
+        else if($category == 'apparatus') {
+            $body .= '<table class="table table-bordered" id="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Borrowed Quantity</th>
+                                <th>Returned Quantity</th>
+                            </tr>
+                        </thead>';
+        }
+        else if($category == 'chemical') {
+            $body .= '<table class="table table-bordered" id="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Overall Weight Purchased</th>
+                                <th>Overall Cost</th>
+                            </tr>
+                        </thead>';
+        }
+
+        if(!empty($rows)):
+            $body .= '<tbody id="dynamic-tbody">';
+            foreach($rows->result() as $row) {
+                if($category == '') {
+                    $body .= '<tr>
+                                <td>'.$row->name.'</td>
+                                <td class="align-right">'.$row->quantity.'</td>
+                                <td class="align-right">'.$row->borrowed_quantity.'</td>
+                                <td class="align-right">'.$row->returned_quantity.'</td>
+                                <td class="align-right">'.$row->total_quantity.$row->unit_of_measure.'</td>
+                                <td class="align-right">'.$row->total_cost.'</td>
+                            </tr>';
+                }
+                else if($category == 'apparatus') {
+                    $body .= '<tr>
+                                <td>'.$row->name.'</td>
+                                <td class="align-right">'.$row->quantity.'</td>
+                                <td class="align-right">'.$row->borrowed_quantity.'</td>
+                                <td class="align-right">'.$row->returned_quantity.'</td>
+                            </tr>';
+                }
+                else if($category == 'chemical') {
+                    $body .= '<tr>
+                                <td>'.$row->name.'</td>
+                                <td class="align-right">'.$row->total_quantity.$row->unit_of_measure.'</td>
+                                <td class="align-right">'.$row->total_cost.'</td>
+                            </tr>';
+                }
+            }
+            $body .= '</tbody>';
+        endif;
+        $body .= '</table>';
+
+        die($body);
     }
 
 	//--------------------------------------------------------------------
