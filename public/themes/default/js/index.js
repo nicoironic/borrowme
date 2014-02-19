@@ -76,10 +76,30 @@ function item_events() {
             var unit    = $(parent).find('span.actual-quantity').attr('actual-unit');
 
             if(parseFloat(price) > 0) {
-                var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1"/> x 10'+unit+'</div></div>';
+                var body    = '<div class="summary-item">' +
+                                '<div class="summary-item-header">' +
+                                    '<span class="item-name">'+item+'</span>' +
+                                    '<div class="close icon-minus-sign" title="Remove"></div>' +
+                                '</div>' +
+                                '<div class="summary-item-details">' +
+                                    '<span class="quantity-label">Quantity:</span>' +
+                                    '<input type="hidden" id="item-id" name="item-id" value="'+itemid+'">' +
+                                    '<input type="text" class="span1 custom-span-width borrow-quantity" id="borrow-quantity" name="borrow-quantity" value="1"/>(x 10grams) x <span id="price">'+price+'</span>' +
+                                '</div>' +
+                            '</div>';
             }
             else {
-                var body    = '<div class="summary-item"><div class="summary-item-header"><span class="item-name">'+item+'</span><div class="close icon-minus-sign" title="Remove"></div></div><div class="summary-item-details"><span class="quantity-label">Quantity:</span><input type="hidden" id="item-id" name="item-id" value="'+itemid+'"><input type="text" class="span1 custom-span-width" id="borrow-quantity" name="borrow-quantity" value="1" /></div></div>';
+                var body    = '<div class="summary-item">' +
+                                '<div class="summary-item-header">' +
+                                    '<span class="item-name">'+item+'</span>' +
+                                    '<div class="close icon-minus-sign" title="Remove"></div>' +
+                                '</div>' +
+                                '<div class="summary-item-details">' +
+                                    '<span class="quantity-label">Quantity:</span>' +
+                                    '<input type="hidden" id="item-id" name="item-id" value="'+itemid+'">' +
+                                    '<input type="text" class="span1 custom-span-width borrow-quantity" id="borrow-quantity" name="borrow-quantity" value="1" />' +
+                                '</div>' +
+                            '</div>';
 
             }
 
@@ -91,7 +111,6 @@ function item_events() {
                 }
                 dynamic_events();
                 add_quantities();
-                decrease_this_item($(this));
             }
         }
     });
@@ -108,10 +127,14 @@ function other_events() {
            $(this).find('div.close').click();
         });
 
-        if($(this).attr('status') == 'apparatus')
+        if($(this).attr('status') == 'apparatus') {
             $('button#checkout').text('Submit Request');
-        else
+            $('h4.green-color').text('Summary');
+        }
+        else {
             $('button#checkout').text('Checkout Items');
+            $('h4.green-color').text('Your Cart Summary');
+        }
 
         item_list('',$(this).attr('status'));
     });
@@ -122,6 +145,9 @@ function other_events() {
     });
 
     $('button#checkout').click(function() {
+        if(!$('input#terms-conditions').is(':checked'))
+            return false;
+
         if(user_id == '' || user_id == 0) {
             window.location.replace(current_url()+'login');
         }
@@ -211,25 +237,25 @@ function dynamic_events() {
         $(this).parents('div.summary-item').remove();
         add_quantities();
     });
+
+    $( "input.borrow-quantity" ).unbind('keyup').keyup(function() {
+        add_quantities();
+    });
 }
 
 function add_quantities() {
     var total = 0;
     $('div.summary-list div.summary-item').each(function() {
-        total = total + parseInt($(this).find('input#borrow-quantity').val());
+        var price = $(this).find('span#price').text();
+        var value = parseInt($(this).find('input#borrow-quantity').val());
+
+        if(parseFloat(price) > 0)
+            value = value * parseFloat(price);
+
+        total = total + value;
     });
 
     $('span.label-total-quantity').text(total);
-}
-
-function decrease_this_item(element) {
-    var parent  = $(element).parents('div.pbox');
-    var qty     = parseInt($(parent).find('span.actual-quantity').text());
-
-//    if(qty > 0) {
-//        qty = qty - 1;
-//        $(parent).find('span.actual-quantity').text(qty);
-//    }
 }
 
 function current_url() {

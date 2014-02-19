@@ -1,3 +1,12 @@
+<?php
+$user_id = 0;
+$role_id = 0;
+if(!empty($current_user)) {
+    $user_id = isset($current_user->id) ? $current_user->id : 0;
+    $role_id = isset($current_user->role_id) ? $current_user->role_id : 0;
+}
+?>
+
 <div class="jumbotron" text-align="center">
     <div class="container-fluid">
         <div class="row-fluid">
@@ -55,6 +64,11 @@
 
                         <div class="summary-checkout">
                             <button type="button" class="btn btn-primary" id="checkout">Submit Request</button>
+                            <?php if($role_id != 1 && $role_id != 0 && $role_id != ''): ?>
+                            <div id="terms">
+                                <input type="checkbox" id="terms-conditions">I have read and agreed with the <a href="/terms-and-conditions">Terms and Conditions</a> for this items.
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -62,14 +76,7 @@
         </div>
     </div>
 
-    <?php
-    $user_id = 0;
-    $role_id = 0;
-    if(!empty($current_user)) {
-        $user_id = isset($current_user->id) ? $current_user->id : 0;
-        $role_id = isset($current_user->role_id) ? $current_user->role_id : 0;
-    }
-    ?>
+
     <input type="hidden" id="user_id" name="user_id" value="<?php echo $user_id?>">
     <input type="hidden" id="role_id" name="role_id" value="<?php echo $role_id?>">
 </div>

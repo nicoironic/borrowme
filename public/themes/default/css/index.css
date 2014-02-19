@@ -112,3 +112,9 @@ div.preloader {
     top: 45%;
     left: 48%;
 }
+div#terms {
+    margin: 2px 0 0 0;
+}
+div#terms input[type="checkbox"] {
+    margin: 0 5px 0 0;
+}
