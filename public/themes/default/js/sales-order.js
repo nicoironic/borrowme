@@ -127,7 +127,7 @@ function init_others() {
                 },
                 success: function(result,status,xhr) {
                     if(result == 'success') {
-                        success_message();
+                        success_message('');
                     }
                 }
             });

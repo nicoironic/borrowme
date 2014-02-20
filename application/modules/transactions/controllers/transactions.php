@@ -449,6 +449,7 @@ class transactions extends Front_Controller
         $code   = $this->input->post('idnum');
         $date   = $this->input->post('date');
         $status = $this->input->post('status');
+
         $this->load->model('lab_incharge/lab_incharge_model', null, true);
         $this->load->model('students/students_model', null, true);
 
@@ -465,37 +466,15 @@ class transactions extends Front_Controller
         $this->returned_items_model->where('id_number',$code);
         $this->returned_items_model->where('created_on',$date);
         $this->returned_items_model->where('status',$status);
+
         $items = $this->returned_items_model->find_all();
 
         switch($status) {
-            case 'pending':
-                $body .= '<h3>Details</h3><table class="table table-bordered table-pending">
-                    <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Quantity</th>
-                    </tr>
-                    </thead>
-                    <tbody>';
-                foreach($items as $row) {
-                    $item = $this->items_model->find($row->item_id);
-                    if($item->category == 'chemical')
-                        $unit = ' x 10'.$item->unit_of_measure;
-                    else
-                        $unit = '';
-
-                    $body .= '<tr>
-                    <td>'.$item->name.'</td>
-                    <td class="text-right">'.$row->quantity.$unit.'</td>
-                    </tr>';
-                }
-
-                $body .= '<tr><td colspan="2" style="text-align:right;"><button type="button" class="btn btn-success btn-pending" thisidnumber='.$code.' thisstatus='.$status.' thisdate='.$date.'>Approve</button></td></tr></tbody></table>';
-                break;
             case 'approved':
                 $body .= '<h3>Details</h3><table class="table table-bordered table-approved">
                     <thead>
                     <tr>
+                        <th>&nbsp;</th>
                         <th>Item</th>
                         <th>Quantity</th>
                         <th>Price</th>
@@ -515,6 +494,7 @@ class transactions extends Front_Controller
                     }
 
                     $body .= '<tr>
+                    <td><input type="checkbox" class="item" id="item" value="'.$row->id.'"></td>
                     <td>'.$item->name.'</td>
                     <td class="text-right">'.$row->quantity.$unit.'</td>
                     <td class="text-right">'.$item->price.'</td>
@@ -523,7 +503,7 @@ class transactions extends Front_Controller
                 }
 
                 $body .= '<tr>
-                                <td colspan="3">
+                                <td colspan="4">
                                     <strong>Total:</strong>
                                 </td>
                                 <td class="text-right">
@@ -531,12 +511,9 @@ class transactions extends Front_Controller
                                 </td>
                           </tr>
                           <tr>
-                            <td colspan="4" style="text-align:right;">
-                                <div class="input-prepend">
-                                  <span class="add-on"><i class="icon-calendar"></i></span>
-                                  <input class="span2 date-borrowed datepicker" id="date-borrowed" type="text" placeholder="Date Borrowed" value="">
-                                </div>
-                                <input class="span2 due-date" id="due-date" type="text" placeholder="Due Date" value="" disabled>
+                            <td colspan="5" style="text-align:right;">
+                                <input type="hidden" id="date-borrowed" value="'.date('Y-m-d').'">
+                                <input type="hidden" id="due-date" value="'.date('Y-m-d', strtotime(date('Y-m-d'). ' + 3 days')).'">
                                 <button style="margin-bottom: 11px;" type="button" class="btn btn-success btn-approved" thisidnumber='.$code.' thisstatus='.$status.' thisdate='.$date.'>Borrow</button>
                             </td>
                           </tr>
@@ -548,15 +525,18 @@ class transactions extends Front_Controller
                 $body .= '<h3>Details</h3><table class="table table-bordered table-borrowed">
                             <thead>
                             <tr>
+                                <th colspan="5">&nbsp;</th>
+                                <th colspan="3" style="text-align: center;">DATE</th>
+                            </tr>
+                            <tr>
                                 <th>&nbsp;</th>
                                 <th>Item</th>
                                 <th>Item Status</th>
-                                <th>Damage Charge</th>
-                                <th>Quantity</th>
-                                <th>Date Borrowed</th>
-                                <th>Due Date</th>
-                                <th>Date Return</th>
-                                <th>Charge</th>
+                                <th>Borrowed Qty</th>
+                                <th>Return Qty</th>
+                                <th>Borrowed</th>
+                                <th>Due</th>
+                                <th>Return</th>
                             </tr>
                             </thead>
                             <tbody>';
@@ -591,12 +571,19 @@ class transactions extends Front_Controller
                         $body .= '<tr>
                                     <td><input type="checkbox" class="check-item"></td>
                                     '.$text.'
-                                    <td><select class="item-status" thisitemvalue="'.$row->item_id.'" thisitemcharge="'.$item->damage_charge.'"><option value="ok">OK</option><option value="broken">Broken</option></select></td>
-                                    <td class="text-right"><span class="item-damage-charge"></span></td>
                                     <td>
-                                        <input class="span1 return-qty" id="return-qty" type="text" value="'.($row->quantity - $row->return_qty).'" thisid="'.$row->id.'">
+                                        <select class="item-status" thisitemvalue="'.$row->item_id.'" thisitemcharge="'.$item->damage_charge.'">
+                                            <option value="ok">OK</option>
+                                            <option value="broken">Broken</option>
+                                        </select>
+                                        <span class="add-on add-on-custom" thischargeid="'.$row->id.'" thischargevalue="'.$item->damage_charge.'"><i class="icon-list"></i></span>
+                                    </td>
+                                    <td class="text-right">'.$row->quantity.'</td>
+                                    <td>
+                                        <input class="span1 return-qty text-right" id="return-qty" type="text" value="'.($row->quantity - $row->return_qty).'" thisid="'.$row->id.'">
                                         <input class="hidden-quantity" type="hidden" value="'.$row->quantity.'" thisid="'.$row->id.'">
                                         <input class="hidden-return-qty" type="hidden" value="'.$row->return_qty.'" thisid="'.$row->id.'">
+                                        <input class="hidden-penalty" type="hidden" value="'.$sum.'">
                                     </td>
                                     <td>'.$row->date_borrowed.'</td>
                                     <td>'.$row->due_date.'</td>
@@ -606,27 +593,43 @@ class transactions extends Front_Controller
                                             <input class="span1 date-return" id="date-return" type="text" placeholder="Date Return" value="'.date('Y-m-d').'">
                                         </div>
                                     </td>
-                                    <td class="text-right"><span class="penalty" id="penalty-'.$row->id.'">'.$sum.'</span></td>
                                 </tr>';
                         $total = $total + $sum;
                     }
                 }
                 $body .= '<tr>
-                            <td>&nbsp;</td>
-                            <td colspan="3" class="text-right"><span class="total-item-damage-charge">&nbsp;</span></td>
-                            <td colspan="5" class="text-right"><strong><span class="total-sum">'.$total.'</span></strong></td>
-                          </tr>
-                          <tr>
-                            <td><strong>TOTAL</strong></td>
-                            <td colspan="8" class="text-right"><strong><span class="overall-sum">'.$total.'</span></strong></td>
-                          </tr>
-                          <tr>
-                            <td colspan="9" class="text-right">
+                            <td colspan="8" class="text-right">
                                 <button type="button" class="btn btn-success btn-returned" thisidnumber='.$code.' thisstatus='.$status.' thisdate='.$date.'>Return</button>
                             </td>
                           </tr>
                           </tbody>
-                          </table>';
+                          </table>
+                          <div class="well well-custom">
+                            <button class="close">&times;</button>
+                            <table class="table table-bordered" id="charge-table">
+                            <thead>
+                            <tr>
+                                <th>Charge</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <td class="text-right">
+                                    <input type="hidden" id="to-charge-id" name="to-charge-id" value="">
+                                    <span class="charge-value"></span>
+                                </td>
+                                <td style="text-align: center;">
+                                    <input type="text" class="item-quantity-for-charge span1 text-right" value="0">
+                                </td>
+                                <td class="text-right">
+                                    <span class="charge-total"></span>
+                                </td>
+                            </tbody>
+                            </table>
+                            <button class="btn btn-success" id="save-charge">Save</button>
+                          </div>
+                          ';
                 break;
             case 'lacking':
                 $total = 0;
@@ -729,28 +732,26 @@ class transactions extends Front_Controller
     }
 
     public function change_status_ajax() {
-        $code = $this->input->post('code');
-        $date = $this->input->post('date');
+        $code   = $this->input->post('code');
+        $date   = $this->input->post('date');
         $status = $this->input->post('status');
 
         switch($status) {
-            case 'pending':
-                $data = array(
-                    'status' => 'approved'
-                );
-
-                $this->db->where('id_number', $code);
-                $this->db->where('created_on', $date);
-                $this->db->where('status', $status);
-                $this->db->update('bf_returned_items', $data);
-                break;
             case 'approved':
                 $message    = '';
                 $continue   = true;
+                $array      = array();
+                $ids        = $this->input->post('items');
+
+                for($x=0; $x<count($ids); $x++) {
+                    array_push($array,$ids[$x]['id']);
+                }
 
                 $this->returned_items_model->where('id_number', $code);
                 $this->returned_items_model->where('created_on', $date);
                 $this->returned_items_model->where('status', $status);
+                $this->returned_items_model->where_in('id', $array);
+
                 $items = $this->returned_items_model->find_all();
                 foreach($items as $row) {
                     $item = $this->items_model->find($row->item_id);
@@ -821,6 +822,7 @@ class transactions extends Front_Controller
                     $this->db->where('id_number', $code);
                     $this->db->where('created_on', $date);
                     $this->db->where('status', $status);
+                    $this->db->where_in('id', $array);
                     $this->db->update('bf_returned_items', $data);
 
                     $this->returned_items_model->where('id_number', $code);
@@ -1131,6 +1133,21 @@ class transactions extends Front_Controller
         $body .= '</tbody></table></td></tr>';
 
         die($body);
+    }
+
+    public function save_charge() {
+        $id         = $this->input->post('id');
+        $quantity   = $this->input->post('quantity');
+        $total      = $this->input->post('total');
+
+        $data = array(
+            'damage_qty'    =>  $quantity,
+            'damage_charge' =>  $total
+        );
+        $this->db->where_in('id', $id);
+        $this->db->update('bf_returned_items', $data);
+
+        die('success');
     }
 
 	//--------------------------------------------------------------------

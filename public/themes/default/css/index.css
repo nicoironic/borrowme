@@ -101,7 +101,7 @@ div.below-content {
     bottom: 0;
     position: absolute;
     width: 94.45299145299145%;
-    margin: 0 10px 15px;
+    margin: 0 10px 0;
 }
 div.below-content div.summary-checkout {
     clear: both;

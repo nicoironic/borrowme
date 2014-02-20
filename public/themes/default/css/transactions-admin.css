@@ -16,8 +16,49 @@ div#detailsModal h3 {
     text-align: left;
 }
 select.item-status {
-    width: 130px;
+    width: 100px;
 }
 input.date-return {
     width: 100px !important;
+}
+span.add-on-custom {
+    float: right;
+    display: none;
+    width: auto;
+    height: 20px;
+    min-width: 16px;
+    padding: 4px 5px;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 20px;
+    text-align: center;
+    text-shadow: 0 1px 0 #fff;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+div.well-custom {
+    display: none;
+    position: absolute;
+    top: 25%;
+    left: 35%;
+    width: 25%;
+    background-color: #f7f7f9;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    padding-top: 8px;
+}
+div.well-custom button.close {
+    margin-bottom: 2%;
+}
+div.well-custom table {
+    background-color: #fff;
+    margin-bottom: 10px;
+}
+div.well-custom button#save-charge {
+    margin-bottom: 10px;
+    float: right;
 }

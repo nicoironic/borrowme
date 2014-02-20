@@ -56,7 +56,7 @@ function init_others() {
                         if($('select#purchase_order_status').val() == 'approved') {
                             $('div#div-status-container').html('<label style="margin-right:53px;">Status:</label><input type="hidden" id="purchase_order_status" name="purchase_order_status" value="approved">Approved');
                         }
-                        success_message();
+                        success_message('');
                     }
                 }
             });

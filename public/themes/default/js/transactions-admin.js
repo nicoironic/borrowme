@@ -72,6 +72,27 @@ function events() {
         },
         function() {
             $('div#detailsModal div.modal-body').html('');
+
+            var tr = $(this).parents('tr');
+            $.ajax({
+                type : "post",
+                url : '/transactions/inner_table_ajax',
+                data: {
+                    "ci_csrf_token"	: ci_csrf_token(),
+                    "date"          : $(this).attr('value'),
+                    "status"        : $(this).attr('thisstatus'),
+                    "idnum"         : $(this).attr('thisidnumber')
+                },
+                success: function(result,status,xhr) {
+                    $('div#detailsModal div.modal-body').html(result);
+                    var what = button_events();
+                    $('div#detailsModal').modal('toggle');
+
+                },
+                complete: function() {
+                    $('div.processing').css('visibility','hidden');
+                }
+            });
         }
     );
 
@@ -122,6 +143,21 @@ function button_events() {
     });
 
     $('button.btn-approved').unbind('click').click(function() {
+        var items = [];
+
+        if($('table.table-approved input.item:checked').length <= 0)
+            return false;
+
+        $('table.table-approved input.item:checked').each(function() {
+            var itemid      = $(this).val();
+
+            var values = {
+                id          : itemid
+            };
+
+            items.push(values);
+        });
+
         $.ajax({
             type : "post",
             url : '/transactions/change_status_ajax',
@@ -132,7 +168,8 @@ function button_events() {
                 "code"          : $(this).attr('thisidnumber'),
                 "date_borrowed" : $('table.table-approved input#date-borrowed').val(),
                 "due_date"      : $('table.table-approved input#due-date').val(),
-                "overall"       : $(this).parents('table').find('span.overall-sum').text()
+                "overall"       : $(this).parents('table').find('span.overall-sum').text(),
+                "items"         : items
             },
             success: function(result,status,xhr) {
                 if(result == 'success') {
@@ -220,11 +257,10 @@ function button_events() {
 
 
         $('table.table-lacking input.return-qty').each(function() {
-            var penalty     = $(this).parents('tr').find('span.penalty').text();
+            var penalty     = $(this).parents('tr').find('input.hidden-penalty').val();
             var itemid      = $(this).attr('thisid');
             var quantity    = $(this).val();
             var status      = $(this).parents('tr').find('select.item-status').val();
-            var charge      = $(this).parents('tr').find('span.item-damage-charge').text();
 
             if(!isNumber(quantity)) {
                 alert('Enter only a numeric value');
@@ -245,18 +281,16 @@ function button_events() {
                 id          : itemid,
                 qty         : quantity,
                 penalty     : penalty,
-                itemstatus  : status,
-                charge      : charge
+                itemstatus  : status
             };
 
             items.push(values);
         });
         $('table.table-borrowed input.check-item:checked').each(function() {
-            var penalty         = $(this).parents('tr').find('span.penalty').text();
+            var penalty         = $(this).parents('tr').find('input.hidden-penalty').val();
             var itemid          = $(this).parents('tr').find('input#return-qty').attr('thisid');
             var rtn_quantity    = $(this).parents('tr').find('input#return-qty').val();
             var status          = $(this).parents('tr').find('select.item-status').val();
-            var charge          = $(this).parents('tr').find('span.item-damage-charge').text();
             var date_return     = $(this).parents('tr').find('input#date-return').val();
 
             if(!isNumber(rtn_quantity)) {
@@ -274,7 +308,6 @@ function button_events() {
                 qty         : rtn_quantity,
                 penalty     : penalty,
                 itemstatus  : status,
-                charge      : charge,
                 date_return : date_return
             };
 
@@ -306,24 +339,6 @@ function button_events() {
         }
     });
 
-    $('select.item-status').change(function() {
-        if($(this).val() == 'broken') {
-            $(this).parents('tr').find('span.item-damage-charge').text($(this).attr('thisitemcharge'));
-
-            var total = 0;
-            $(this).parents('table').find('span.item-damage-charge').each(function() {
-                total = total + parseFloat($(this).text());
-            });
-            $(this).parents('table').find('span.total-item-damage-charge').text(total);
-        }
-
-        var dmg = parseFloat($(this).parents('table').find('span.total-item-damage-charge').text());
-        var chr = parseFloat($(this).parents('table').find('span.total-sum').text());
-        var sum = dmg + chr;
-
-        $(this).parents('table').find('span.overall-sum').text(sum);
-    });
-
     $('a.lacking-details').unbind('click').click(function() {
         var a = $(this);
 
@@ -347,6 +362,61 @@ function button_events() {
                 }
             });
         }
+    });
+
+    $('select.item-status').change(function() {
+        if($(this).val() == 'broken') {
+            $(this).parent().find('span.add-on-custom').css('display','inline-block');
+        }
+        else {
+            $(this).parent().find('span.add-on-custom').css('display','none');
+        }
+    });
+
+    $('span.add-on-custom').unbind('click').click(function() {
+        $('div.well-custom').find('input#to-charge-id').val($(this).attr('thischargeid'));
+        $('div.well-custom').find('span.charge-value').text($(this).attr('thischargevalue'));
+        $('div.well-custom').find('input.item-quantity-for-charge').val('');
+        $('div.well-custom').find('span.charge-total').text('');
+
+        $('div.well-custom').toggle();
+    });
+
+    $('div.well-custom button.close').unbind('click').click(function() {
+        $('div.well-custom').hide();
+    });
+
+    $('div.well-custom input.item-quantity-for-charge').unbind('keyup').keyup(function() {
+        var charge      = parseFloat($(this).parents('tr').find('span.charge-value').text());
+        var quantity    = parseInt($(this).val());
+
+        $(this).parents('tr').find('span.charge-total').text(charge * quantity);
+    });
+
+    $('button#save-charge').unbind('click').click(function() {
+        $.ajax({
+            type : "post",
+            url : '/transactions/save_charge',
+            data: {
+                "ci_csrf_token"	: ci_csrf_token(),
+                "id"            : $('table#charge-table input#to-charge-id').val(),
+                "quantity"      : $('table#charge-table input.item-quantity-for-charge').val(),
+                "total"         : $('table#charge-table span.charge-total').text()
+            },
+            success: function(result) {
+                if(result == 'success') {
+                    success_message('');
+                    $('div.well-custom button.close').click();
+                }
+                else {
+                    error_message('');
+                }
+
+            },
+            complete: function(result) {
+
+            }
+        });
     });
 
     return true;

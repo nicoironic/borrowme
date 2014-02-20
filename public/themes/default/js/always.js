@@ -31,9 +31,9 @@ function  get_notifications() {
     });
 }
 
-function success_message() {
+function success_message(message) {
     jSuccess(
-        'Successful!',
+        'Successful!'+message,
         {
             autoHide : true, // added in v2.0
             TimeShown : 3000,
@@ -61,7 +61,7 @@ function warning_message(message) {
 
 function error_message(message) {
     jError(
-        'Something is wrong!',
+        'Something is wrong!'+message,
         {
             autoHide : true, // added in v2.0
             TimeShown : 3000,

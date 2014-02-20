@@ -8,10 +8,7 @@
                 <a href="javascript:void(0);" class="status" status="all">All</a>
             </li>
             <li>
-                <a href="javascript:void(0);" class="status" status="pending">Pending</a>
-            </li>
-            <li>
-                <a href="javascript:void(0);" class="status" status="approved">Approved</a>
+                <a href="javascript:void(0);" class="status" status="approved">Pending</a>
             </li>
             <li>
                 <a href="javascript:void(0);" class="status" status="borrowed">Borrowed</a>

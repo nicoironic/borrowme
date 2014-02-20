@@ -359,7 +359,7 @@ class Home extends CI_Controller
                     'worker_id'         => $worker->worker_id,
                     'item_id'           => $items[$x]['id'],
                     'quantity'          => $items[$x]['qty'],
-                    'status'            => 'pending',
+                    'status'            => 'approved',
                     'id_number'         => $worker->id_number,
                     'created_on'        => date('Y-m-d H:i:s'),
                     'modified_on'       => date('Y-m-d H:i:s')
@@ -384,7 +384,7 @@ class Home extends CI_Controller
                     'student_id'        => $student->student_id,
                     'item_id'           => $items[$x]['id'],
                     'quantity'          => $items[$x]['qty'],
-                    'status'            => 'pending',
+                    'status'            => 'approved',
                     'id_number'         => $student->id_number,
                     'created_on'        => date('Y-m-d H:i:s'),
                     'modified_on'       => date('Y-m-d H:i:s')
